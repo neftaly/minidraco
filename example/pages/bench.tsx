@@ -145,34 +145,75 @@ const RunButton = ({ running, onClick, label }: { running: boolean; onClick: () 
   </button>
 )
 
-// Copies the results in the same shape as BENCH.json (plus browser metadata)
-// so V8 runs can be pasted into the repo / diffed against previous ones
-const CopyJsonButton = ({ section, config, rows }: { section: string; config: object; rows: BenchRow[] }) => {
+// Same shape as the bun-generated BENCH.json, plus browser metadata
+const buildResultsJson = (config: object, rows: BenchRow[]) => ({
+  date: new Date().toLocaleDateString('en-CA'),
+  runtime: navigator.userAgent,
+  ...config,
+  results: rows.map(row => ({
+    file: row.model,
+    ...(row.primitives === undefined ? {} : { primitives: row.primitives, faces: row.faces }),
+    medianMs: Object.fromEntries(Object.entries(row.medianMs).map(([k, v]) => [k, Number(v.toFixed(3))])),
+  })),
+})
+
+type ResultsSection = 'singleThreaded' | 'multiThreaded'
+
+// In local dev, next.config.mjs runs a small companion server that merges
+// each section's results into BENCH.browser.json at the repo root, so V8
+// runs are tracked in git next to the bun results
+const BENCH_RESULTS_URL = 'http://localhost:41999'
+
+const ResultsActions = ({
+  section,
+  config,
+  rows,
+  canSave,
+}: {
+  section: ResultsSection
+  config: object
+  rows: BenchRow[]
+  canSave: boolean
+}) => {
   const [copied, setCopied] = useState(false)
+  const [saveState, setSaveState] = useState<'idle' | 'saved' | 'error'>('idle')
   if (rows.length === 0) return null
 
   const copy = () => {
-    const json = {
-      section,
-      date: new Date().toLocaleDateString('en-CA'),
-      runtime: navigator.userAgent,
-      ...config,
-      results: rows.map(row => ({
-        file: row.model,
-        ...(row.primitives === undefined ? {} : { primitives: row.primitives, faces: row.faces }),
-        medianMs: Object.fromEntries(Object.entries(row.medianMs).map(([k, v]) => [k, Number(v.toFixed(3))])),
-      })),
-    }
-    navigator.clipboard.writeText(`${JSON.stringify(json, null, 2)}\n`).then(() => {
+    navigator.clipboard.writeText(`${JSON.stringify(buildResultsJson(config, rows), null, 2)}\n`).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
   }
 
+  const save = async () => {
+    try {
+      const response = await fetch(BENCH_RESULTS_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ section, data: buildResultsJson(config, rows) }),
+      })
+      if (!response.ok) throw new Error(await response.text())
+      setSaveState('saved')
+    } catch {
+      setSaveState('error')
+    }
+    setTimeout(() => setSaveState('idle'), 2000)
+  }
+
+  const buttonClass = 'mb-4 rounded bg-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-600'
+
   return (
-    <button className="mb-4 rounded bg-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-600" onClick={copy}>
-      {copied ? 'Copied!' : 'Copy JSON'}
-    </button>
+    <div className="flex gap-3">
+      <button className={buttonClass} onClick={copy}>
+        {copied ? 'Copied!' : 'Copy JSON'}
+      </button>
+      {canSave && (
+        <button className={buttonClass} onClick={save}>
+          {saveState === 'saved' ? 'Saved!' : saveState === 'error' ? 'Save failed' : 'Save to BENCH.browser.json'}
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -252,10 +293,15 @@ const RawBenchSection = () => {
       <p className="mb-4 text-sm text-neutral-400">{status}</p>
       <BenchTable rows={rows} />
       {!running && (
-        <CopyJsonButton
-          section="raw-decode-main-thread"
-          config={{ warmupRuns: RAW_WARMUP_RUNS, timedRuns: RAW_TIMED_RUNS }}
+        <ResultsActions
+          section="singleThreaded"
+          config={{
+            benchmark: 'raw decode, all decoders sync on main thread',
+            warmupRuns: RAW_WARMUP_RUNS,
+            timedRuns: RAW_TIMED_RUNS,
+          }}
           rows={rows}
+          canSave={(sampleCount ?? 0) > 0}
         />
       )}
     </section>
@@ -336,10 +382,15 @@ const LoaderBenchSection = () => {
       <p className="mb-4 text-sm text-neutral-400">{status}</p>
       <BenchTable rows={rows} />
       {!running && (
-        <CopyJsonButton
-          section="gltfloader-wall-clock"
-          config={{ warmupRuns: LOADER_WARMUP_RUNS, timedRuns: LOADER_TIMED_RUNS }}
+        <ResultsActions
+          section="multiThreaded"
+          config={{
+            benchmark: 'GLTFLoader wall clock; minidraco + wasm on 4-worker pools, draco.js main thread',
+            warmupRuns: LOADER_WARMUP_RUNS,
+            timedRuns: LOADER_TIMED_RUNS,
+          }}
           rows={rows}
+          canSave={(sampleCount ?? 0) > 0}
         />
       )}
     </section>

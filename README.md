@@ -71,7 +71,10 @@ perf work). Highlights, decoding the three production bundle GLBs in
 
 The `/bench` page of the example runs the same fair comparison in the browser (V8): a raw
 single-threaded mode where all three decoders decode on the main thread, over the bundles plus
-the draco.js sample models (synced locally by `bun dev`, never deployed).
+the draco.js sample models (synced locally by `bun dev`, never deployed). Browser runs — both
+the single-threaded mode and the multi-threaded GLTFLoader wall clock — are tracked in
+[BENCH.browser.json](https://github.com/verekia/minidraco/blob/main/BENCH.browser.json) via the
+page's "Save to BENCH.browser.json" button (local dev only).
 
 In the browser the worker pool changes the story for real scenes — wall-clock
 `GLTFLoader.parse` of the 488-primitive static bundle (Chromium, warm loaders, `/bench` page of

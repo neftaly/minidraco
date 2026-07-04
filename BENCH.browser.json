@@ -1,0 +1,356 @@
+{
+  "singleThreaded": {
+    "date": "2026-07-05",
+    "runtime": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+    "benchmark": "raw decode, all decoders sync on main thread",
+    "warmupRuns": 3,
+    "timedRuns": 10,
+    "results": [
+      {
+        "file": "canine-bundle.glb",
+        "primitives": 1,
+        "faces": 532,
+        "medianMs": {
+          "minidraco": 0.6,
+          "draco.js": 0.6,
+          "draco3d (wasm)": 0.4
+        }
+      },
+      {
+        "file": "player-bundle.glb",
+        "primitives": 7,
+        "faces": 2544,
+        "medianMs": {
+          "minidraco": 2.2,
+          "draco.js": 2.5,
+          "draco3d (wasm)": 2
+        }
+      },
+      {
+        "file": "static-bundle.glb",
+        "primitives": 488,
+        "faces": 220879,
+        "medianMs": {
+          "minidraco": 64.4,
+          "draco.js": 64.2,
+          "draco3d (wasm)": 82.2
+        }
+      },
+      {
+        "file": "IridescentDishWithOlives.glb",
+        "primitives": 4,
+        "faces": 24448,
+        "medianMs": {
+          "minidraco": 5.6,
+          "draco.js": 5.7,
+          "draco3d (wasm)": 8.1
+        }
+      },
+      {
+        "file": "LittlestTokyo.glb",
+        "primitives": 71,
+        "faces": 141802,
+        "medianMs": {
+          "minidraco": 91,
+          "draco.js": 97.9,
+          "draco3d (wasm)": 136.4
+        }
+      },
+      {
+        "file": "ShaderBall2.glb",
+        "primitives": 3,
+        "faces": 13388,
+        "medianMs": {
+          "minidraco": 6,
+          "draco.js": 5.7,
+          "draco3d (wasm)": 9.3
+        }
+      },
+      {
+        "file": "bath_day.glb",
+        "primitives": 22,
+        "faces": 32158,
+        "medianMs": {
+          "minidraco": 7.7,
+          "draco.js": 7.5,
+          "draco3d (wasm)": 10.7
+        }
+      },
+      {
+        "file": "duck.glb",
+        "primitives": 1,
+        "faces": 4212,
+        "medianMs": {
+          "minidraco": 1.2,
+          "draco.js": 1.2,
+          "draco3d (wasm)": 2.1
+        }
+      },
+      {
+        "file": "ferrari.glb",
+        "primitives": 51,
+        "faces": 358788,
+        "medianMs": {
+          "minidraco": 89.3,
+          "draco.js": 85.7,
+          "draco3d (wasm)": 137.6
+        }
+      },
+      {
+        "file": "forest_house.glb",
+        "primitives": 12,
+        "faces": 10956,
+        "medianMs": {
+          "minidraco": 3.4,
+          "draco.js": 3.6,
+          "draco3d (wasm)": 5.2
+        }
+      },
+      {
+        "file": "gears.glb",
+        "primitives": 3,
+        "faces": 21696,
+        "medianMs": {
+          "minidraco": 4.5,
+          "draco.js": 4.3,
+          "draco3d (wasm)": 5.9
+        }
+      },
+      {
+        "file": "kira.glb",
+        "primitives": 43,
+        "faces": 51601,
+        "medianMs": {
+          "minidraco": 13.7,
+          "draco.js": 13.7,
+          "draco3d (wasm)": 21.4
+        }
+      },
+      {
+        "file": "minimalistic_modern_bedroom.glb",
+        "primitives": 4,
+        "faces": 10457,
+        "medianMs": {
+          "minidraco": 3.7,
+          "draco.js": 3.8,
+          "draco3d (wasm)": 5.4
+        }
+      },
+      {
+        "file": "nemetona.glb",
+        "primitives": 1,
+        "faces": 320352,
+        "medianMs": {
+          "minidraco": 169.8,
+          "draco.js": 169.5,
+          "draco3d (wasm)": 225.9
+        }
+      },
+      {
+        "file": "pool.glb",
+        "primitives": 2,
+        "faces": 22280,
+        "medianMs": {
+          "minidraco": 5.1,
+          "draco.js": 4.7,
+          "draco3d (wasm)": 7
+        }
+      },
+      {
+        "file": "rolex.glb",
+        "primitives": 24,
+        "faces": 120336,
+        "medianMs": {
+          "minidraco": 44.3,
+          "draco.js": 43.2,
+          "draco3d (wasm)": 71.7
+        }
+      },
+      {
+        "file": "venice_mask.glb",
+        "primitives": 5,
+        "faces": 295600,
+        "medianMs": {
+          "minidraco": 93.6,
+          "draco.js": 93.2,
+          "draco3d (wasm)": 136
+        }
+      },
+      {
+        "file": "bunny.drc",
+        "primitives": 1,
+        "faces": 69451,
+        "medianMs": {
+          "minidraco": 12.9,
+          "draco.js": 13.1,
+          "draco3d (wasm)": 6.7
+        }
+      },
+      {
+        "file": "car.drc",
+        "primitives": 1,
+        "faces": 1744,
+        "medianMs": {
+          "minidraco": 2.3,
+          "draco.js": 2.3,
+          "draco3d (wasm)": 0.5
+        }
+      },
+      {
+        "file": "duck.drc",
+        "primitives": 1,
+        "faces": 4212,
+        "medianMs": {
+          "minidraco": 1.2,
+          "draco.js": 1.2,
+          "draco3d (wasm)": 2.1
+        }
+      }
+    ]
+  },
+  "multiThreaded": {
+    "date": "2026-07-05",
+    "runtime": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+    "benchmark": "GLTFLoader wall clock; minidraco + wasm on 4-worker pools, draco.js main thread",
+    "warmupRuns": 1,
+    "timedRuns": 5,
+    "results": [
+      {
+        "file": "canine-bundle.glb",
+        "medianMs": {
+          "minidraco": 6.2,
+          "draco.js": 6,
+          "draco3d (wasm)": 8.8
+        }
+      },
+      {
+        "file": "player-bundle.glb",
+        "medianMs": {
+          "minidraco": 9.2,
+          "draco.js": 11.5,
+          "draco3d (wasm)": 7.2
+        }
+      },
+      {
+        "file": "static-bundle.glb",
+        "medianMs": {
+          "minidraco": 51.8,
+          "draco.js": 99.2,
+          "draco3d (wasm)": 58.5
+        }
+      },
+      {
+        "file": "IridescentDishWithOlives.glb",
+        "medianMs": {
+          "minidraco": 69.3,
+          "draco.js": 67.8,
+          "draco3d (wasm)": 62.3
+        }
+      },
+      {
+        "file": "LittlestTokyo.glb",
+        "medianMs": {
+          "minidraco": 83.4,
+          "draco.js": 172.8,
+          "draco3d (wasm)": 89.4
+        }
+      },
+      {
+        "file": "ShaderBall2.glb",
+        "medianMs": {
+          "minidraco": 13.4,
+          "draco.js": 19.2,
+          "draco3d (wasm)": 13.2
+        }
+      },
+      {
+        "file": "bath_day.glb",
+        "medianMs": {
+          "minidraco": 39.4,
+          "draco.js": 46.1,
+          "draco3d (wasm)": 40.6
+        }
+      },
+      {
+        "file": "duck.glb",
+        "medianMs": {
+          "minidraco": 3.5,
+          "draco.js": 2.8,
+          "draco3d (wasm)": 2.7
+        }
+      },
+      {
+        "file": "ferrari.glb",
+        "medianMs": {
+          "minidraco": 37.6,
+          "draco.js": 86.4,
+          "draco3d (wasm)": 44
+        }
+      },
+      {
+        "file": "forest_house.glb",
+        "medianMs": {
+          "minidraco": 24.3,
+          "draco.js": 27.4,
+          "draco3d (wasm)": 23.6
+        }
+      },
+      {
+        "file": "gears.glb",
+        "medianMs": {
+          "minidraco": 2.7,
+          "draco.js": 4.8,
+          "draco3d (wasm)": 3.3
+        }
+      },
+      {
+        "file": "kira.glb",
+        "medianMs": {
+          "minidraco": 234.6,
+          "draco.js": 240.5,
+          "draco3d (wasm)": 226.1
+        }
+      },
+      {
+        "file": "minimalistic_modern_bedroom.glb",
+        "medianMs": {
+          "minidraco": 33,
+          "draco.js": 37.1,
+          "draco3d (wasm)": 31.8
+        }
+      },
+      {
+        "file": "nemetona.glb",
+        "medianMs": {
+          "minidraco": 172.1,
+          "draco.js": 201.3,
+          "draco3d (wasm)": 218.9
+        }
+      },
+      {
+        "file": "pool.glb",
+        "medianMs": {
+          "minidraco": 42.3,
+          "draco.js": 46.4,
+          "draco3d (wasm)": 43.1
+        }
+      },
+      {
+        "file": "rolex.glb",
+        "medianMs": {
+          "minidraco": 29.7,
+          "draco.js": 64.8,
+          "draco3d (wasm)": 36.3
+        }
+      },
+      {
+        "file": "venice_mask.glb",
+        "medianMs": {
+          "minidraco": 70.6,
+          "draco.js": 156.3,
+          "draco3d (wasm)": 88.1
+        }
+      }
+    ]
+  }
+}
