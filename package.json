@@ -1,0 +1,38 @@
+{
+  "name": "minidraco-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "example",
+    "library"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --parallel --filter '*' dev",
+    "build": "bun run --filter '*' build",
+    "start": "bun run --filter '*' start",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "test": "bun test",
+    "bench": "bun run library/scripts/bench.ts",
+    "warden": "warden",
+    "all": "bun run format:check && bun run lint && bun run typecheck && bun run warden && bun run test",
+    "prepare": "husky",
+    "pub": "bun run --filter 'minidraco' build && npm publish --workspace library"
+  },
+  "devDependencies": {
+    "@verekia/warden": "0.0.4",
+    "husky": "9.1.7",
+    "oxfmt": "0.48.0",
+    "oxlint": "1.63.0",
+    "typescript": "6.0.3"
+  },
+  "patchedDependencies": {
+    "detect-gpu@5.0.70": "patches/detect-gpu@5.0.70.patch",
+    "@react-three/fiber@10.0.0-canary.1b98c17": "patches/@react-three%2Ffiber@10.0.0-canary.1b98c17.patch",
+    "@react-three/drei@11.0.0-alpha.5": "patches/@react-three%2Fdrei@11.0.0-alpha.5.patch"
+  }
+}
