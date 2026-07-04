@@ -164,6 +164,15 @@ export class DecoderBuffer {
     return result
   }
 
+  // Zero-copy variant of decodeBytes: a view into the stream, only valid until
+  // the caller's next chance to mutate the buffer — copy out before keeping it.
+  decodeBytesView(size: number): Uint8Array | undefined {
+    if (this._pos + size > this._dataSize) return undefined
+    const result = this._data!.subarray(this._pos, this._pos + size)
+    this._pos += size
+    return result
+  }
+
   startBitDecoding(decodeSize: boolean): number | undefined {
     let outSize: number | undefined = 0
     if (decodeSize) {

@@ -96,15 +96,15 @@ class SequentialAttributeDecoder {
   decodeValues(pointIds: Int32Array, buffer: DecoderBuffer): boolean {
     const numValues = pointIds.length
     const entrySize = this._attribute!.byteStride
-    let outBytePos = 0
-    for (let i = 0; i < numValues; i++) {
-      const valueData = buffer.decodeBytes(entrySize)
-      if (valueData === undefined) {
-        return false
-      }
-      this._attribute!.buffer!.write(outBytePos, valueData, entrySize)
-      outBytePos += entrySize
+    // Raw values sit contiguously in the stream in the exact layout the
+    // attribute buffer uses, so copy them in one block instead of allocating
+    // a slice per value (that loop dominated raw sequential decode time).
+    const totalSize = numValues * entrySize
+    const valueData = buffer.decodeBytesView(totalSize)
+    if (valueData === undefined) {
+      return false
     }
+    this._attribute!.buffer!.write(0, valueData, totalSize)
     return true
   }
 

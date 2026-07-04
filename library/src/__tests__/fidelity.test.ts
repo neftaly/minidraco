@@ -1,11 +1,17 @@
 // Fidelity suite: minidraco must reproduce the official draco3d wasm decoder's
-// output on the production bundle GLBs — identical connectivity, identical
-// integer attributes, and float attributes within 1 ulp (the wasm decoder
-// dequantizes in 32-bit floats; JS computes in doubles before rounding to
-// float32, which can differ in the last bit).
+// output on the production bundle GLBs and the draco.js sample models —
+// identical connectivity, identical integer attributes, and float attributes
+// within 1 ulp (the wasm decoder dequantizes in 32-bit floats; JS computes in
+// doubles before rounding to float32, which can differ in the last bit).
 import { describe, expect, test } from 'bun:test'
 
-import { BUNDLE_GLBS, decodeWithDraco3d, decodeWithMinidraco, extractDracoPrimitives } from '../../scripts/harness'
+import {
+  BUNDLE_GLBS,
+  SAMPLE_GLBS,
+  decodeWithDraco3d,
+  decodeWithMinidraco,
+  extractDracoPrimitives,
+} from '../../scripts/harness'
 
 import type { DecodedPrimitive } from '../../scripts/harness'
 
@@ -58,7 +64,7 @@ const compare = (actual: DecodedPrimitive, expected: DecodedPrimitive, label: st
   }
 }
 
-for (const glbPath of BUNDLE_GLBS) {
+for (const glbPath of [...BUNDLE_GLBS, ...SAMPLE_GLBS]) {
   const fileName = glbPath.split('/').pop()!
   const primitives = extractDracoPrimitives(glbPath)
 

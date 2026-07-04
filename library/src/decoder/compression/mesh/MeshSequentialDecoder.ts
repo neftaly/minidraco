@@ -33,6 +33,10 @@ class MeshSequentialDecoder extends MeshDecoder {
       return false
     }
 
+    // numFaces is known up front (and bounded by the buffer size checks
+    // above), so reserve the face buffer once instead of growing per face
+    this.mesh()!._ensureFaceCapacity(numFaces)
+
     if (connectivityMethod === 0) {
       if (!this._decodeAndDecompressIndices(numFaces)) {
         return false

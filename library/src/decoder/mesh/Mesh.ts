@@ -31,7 +31,9 @@ class Mesh extends PointCloud {
     if (this.faces_.length >= numFaces * 3) {
       return
     }
-    const grown = new Int32Array(numFaces * 3)
+    // Grow geometrically so incremental addFace stays amortized O(1) instead
+    // of reallocating + copying the whole buffer per face
+    const grown = new Int32Array(Math.max(numFaces * 3, this.faces_.length * 2))
     grown.set(this.faces_)
     this.faces_ = grown
   }

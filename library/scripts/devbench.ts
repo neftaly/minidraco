@@ -2,12 +2,25 @@
 // warmup. Min time is the most stable metric for comparing code versions;
 // the cross-decoder bench.ts is for headline numbers, not for optimization
 // decisions (interleaving decoders adds ±10% JIT noise).
-import { decodeWithMinidraco, extractDracoPrimitives } from './harness'
+//
+//   bun scripts/devbench.ts                    # the three production bundles
+//   bun scripts/devbench.ts bunny.drc kira.glb # any corpus models (see harness)
+import { BUNDLE_GLBS, SAMPLE_DRCS, SAMPLE_GLBS, decodeWithMinidraco, extractPrimitives } from './harness'
 
-const models = ['player-bundle', 'static-bundle', 'canine-bundle']
+const corpus = [...BUNDLE_GLBS, ...SAMPLE_GLBS, ...SAMPLE_DRCS]
+const requested = process.argv.slice(2)
+
+const models = requested.length
+  ? requested.map(name => {
+      const path = corpus.find(p => p.endsWith(`/${name}`))
+      if (!path) throw new Error(`unknown model ${name}`)
+      return path
+    })
+  : BUNDLE_GLBS
 
 for (const model of models) {
-  const primitives = extractDracoPrimitives(`${import.meta.dir}/../../example/public/models/${model}.glb`)
+  const name = model.split('/').pop()!
+  const primitives = extractPrimitives(model)
   for (let i = 0; i < 5; i++) for (const p of primitives) decodeWithMinidraco(p)
 
   const times: number[] = []
@@ -17,5 +30,5 @@ for (const model of models) {
     times.push(performance.now() - start)
   }
   times.sort((a, b) => a - b)
-  console.log(`${model}  min: ${times[0].toFixed(2)}  p25: ${times[7].toFixed(2)}  median: ${times[15].toFixed(2)}`)
+  console.log(`${name}  min: ${times[0].toFixed(2)}  p25: ${times[7].toFixed(2)}  median: ${times[15].toFixed(2)}`)
 }

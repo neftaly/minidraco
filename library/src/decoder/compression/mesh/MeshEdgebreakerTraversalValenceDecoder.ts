@@ -27,7 +27,7 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
   _activeContext: number
   _minValence: number
   _maxValence: number
-  _vertexValences: number[]
+  _vertexValences: Int32Array
   _contextSymbols: Uint32Array[]
   _contextCounters: number[]
 
@@ -39,7 +39,7 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
     this._activeContext = -1
     this._minValence = 2
     this._maxValence = 7
-    this._vertexValences = []
+    this._vertexValences = new Int32Array(0)
     this._contextSymbols = []
     this._contextCounters = []
   }
@@ -68,7 +68,9 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
     if (this._numVertices < 0) {
       return false
     }
-    this._vertexValences = new Array<number>(this._numVertices).fill(0)
+    // Int32Array: read/written for every decoded symbol; typed access keeps
+    // the newActiveCornerReached hot path monomorphic
+    this._vertexValences = new Int32Array(this._numVertices)
 
     const numUniqueValences = this._maxValence - this._minValence + 1
 
@@ -117,37 +119,43 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
   }
 
   override newActiveCornerReached(corner: number): void {
-    const ct = this._cornerTable!
-    const next = ct.next(corner)
-    const prev = ct.previous(corner)
+    // Called once per decoded symbol from _decodeConnectivity's hot loop with
+    // a fresh, valid corner, so inline next/previous/vertex as flat-array
+    // reads instead of paying the corner-table method dispatch 6-8x per call.
+    const cornerToVertex = this._cornerTable!._cornerToVertex!
+    const valences = this._vertexValences
+    const next = corner % 3 === 2 ? corner - 2 : corner + 1
+    const prev = corner % 3 === 0 ? corner + 2 : corner - 1
+    const vertNext = cornerToVertex[next]
+    const vertPrev = cornerToVertex[prev]
 
     switch (this._lastSymbol) {
       case TOPOLOGY_C:
       case TOPOLOGY_S:
-        this._vertexValences[ct.vertex(next)] += 1
-        this._vertexValences[ct.vertex(prev)] += 1
+        valences[vertNext] += 1
+        valences[vertPrev] += 1
         break
       case TOPOLOGY_R:
-        this._vertexValences[ct.vertex(corner)] += 1
-        this._vertexValences[ct.vertex(next)] += 1
-        this._vertexValences[ct.vertex(prev)] += 2
+        valences[cornerToVertex[corner]] += 1
+        valences[vertNext] += 1
+        valences[vertPrev] += 2
         break
       case TOPOLOGY_L:
-        this._vertexValences[ct.vertex(corner)] += 1
-        this._vertexValences[ct.vertex(next)] += 2
-        this._vertexValences[ct.vertex(prev)] += 1
+        valences[cornerToVertex[corner]] += 1
+        valences[vertNext] += 2
+        valences[vertPrev] += 1
         break
       case TOPOLOGY_E:
-        this._vertexValences[ct.vertex(corner)] += 2
-        this._vertexValences[ct.vertex(next)] += 2
-        this._vertexValences[ct.vertex(prev)] += 2
+        valences[cornerToVertex[corner]] += 2
+        valences[vertNext] += 2
+        valences[vertPrev] += 2
         break
       default:
         break
     }
 
     // The clamped valence of the next vertex selects the entropy context.
-    const activeValence = this._vertexValences[ct.vertex(next)]
+    const activeValence = valences[vertNext]
     let clampedValence: number
     if (activeValence < this._minValence) {
       clampedValence = this._minValence
