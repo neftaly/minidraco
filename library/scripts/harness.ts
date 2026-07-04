@@ -2,7 +2,8 @@
 // Draco bitstreams from KHR_draco_mesh_compression GLBs and decodes them with
 // each of the three decoders under comparison (minidraco, draco.js, draco3d
 // wasm), normalizing the results to plain typed arrays so they can be diffed.
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 import { decodeDracoMesh } from '../src/index'
 
@@ -275,3 +276,39 @@ export const BUNDLE_GLBS = [
   `${import.meta.dir}/../../example/public/models/player-bundle.glb`,
   `${import.meta.dir}/../../example/public/models/static-bundle.glb`,
 ]
+
+// draco.js ships its sample models inside the package (pinned by commit in
+// package.json), so they are used straight from node_modules instead of being
+// vendored into the repo.
+export const DRACO_JS_SAMPLES_DIR = fileURLToPath(new URL('samples/', import.meta.resolve('draco.js/package.json')))
+
+export const SAMPLE_GLBS = readdirSync(DRACO_JS_SAMPLES_DIR)
+  .filter(name => name.endsWith('.glb'))
+  .toSorted()
+  .map(name => DRACO_JS_SAMPLES_DIR + name)
+
+// Standalone Draco bitstreams (real models only — the tiny cube/test .drc
+// files live in the fidelity test fixtures instead)
+export const SAMPLE_DRCS = ['bunny.drc', 'car.drc', 'duck.drc'].map(name => DRACO_JS_SAMPLES_DIR + name)
+
+// A raw .drc file is a single Draco bitstream with no glTF attribute map, so
+// the unique attribute ids are enumerated from a throwaway decode.
+export const extractDrcPrimitive = (drcPath: string): DracoPrimitive => {
+  const data = new Uint8Array(readFileSync(drcPath))
+  const mesh = decodeDracoMesh(data)
+  const attributes: Record<string, number> = {}
+  for (const attribute of mesh.attributes_) {
+    if (attribute) attributes[`ATTR_${attribute.uniqueId}`] = attribute.uniqueId
+  }
+  return {
+    file: drcPath,
+    meshName: drcPath.split('/').pop()!,
+    meshIndex: 0,
+    primitiveIndex: 0,
+    data,
+    attributes,
+  }
+}
+
+export const extractPrimitives = (path: string): DracoPrimitive[] =>
+  path.endsWith('.drc') ? [extractDrcPrimitive(path)] : extractDracoPrimitives(path)
