@@ -83,23 +83,23 @@ texture decode and scene-graph setup. Median of 5 runs after 1 warmup, GLBs only
 
 | file                              | minidraco |  draco.js | draco3d (wasm) | minidraco vs draco.js | minidraco vs wasm |
 | --------------------------------- | --------: | --------: | -------------: | --------------------- | ----------------- |
-| `canine-bundle.glb`               |   5.00 ms |   4.40 ms |        9.30 ms | 🔴 1.14x slower       | 🟢 1.86x faster   |
-| `player-bundle.glb`               |   9.30 ms |   9.40 ms |        7.20 ms | ⚪ even               | 🔴 1.29x slower   |
-| `static-bundle.glb`               |  52.00 ms |  94.30 ms |       49.40 ms | 🟢 1.81x faster       | 🔴 1.05x slower   |
-| `IridescentDishWithOlives.glb`    |  68.30 ms |  70.60 ms |       63.60 ms | ⚪ even               | 🔴 1.07x slower   |
-| `LittlestTokyo.glb`               |  87.50 ms | 175.00 ms |       89.30 ms | 🟢 2.00x faster       | ⚪ even           |
-| `ShaderBall2.glb`                 |  13.40 ms |  19.60 ms |       15.10 ms | 🟢 1.46x faster       | 🟢 1.13x faster   |
-| `bath_day.glb`                    |  39.00 ms |  52.90 ms |       39.50 ms | 🟢 1.36x faster       | ⚪ even           |
-| `duck.glb`                        |   1.70 ms |   3.30 ms |        2.10 ms | 🟢 1.94x faster       | 🟢 1.24x faster   |
-| `ferrari.glb`                     |  35.60 ms |  89.30 ms |       28.40 ms | 🟢 2.51x faster       | 🔴 1.25x slower   |
-| `forest_house.glb`                |  26.00 ms |  30.10 ms |       24.90 ms | 🟢 1.16x faster       | ⚪ even           |
-| `gears.glb`                       |   2.90 ms |   4.90 ms |        2.10 ms | 🟢 1.69x faster       | 🔴 1.38x slower   |
-| `kira.glb`                        | 259.50 ms | 245.50 ms |      230.20 ms | 🔴 1.06x slower       | 🔴 1.13x slower   |
-| `minimalistic_modern_bedroom.glb` |  32.90 ms |  38.90 ms |       33.50 ms | 🟢 1.18x faster       | ⚪ even           |
-| `nemetona.glb`                    | 187.60 ms | 198.00 ms |      143.60 ms | 🟢 1.06x faster       | 🔴 1.31x slower   |
-| `pool.glb`                        |  41.90 ms |  48.70 ms |       43.00 ms | 🟢 1.16x faster       | ⚪ even           |
-| `rolex.glb`                       |  32.10 ms |  64.20 ms |       22.50 ms | 🟢 2.00x faster       | 🔴 1.43x slower   |
-| `venice_mask.glb`                 |  72.90 ms | 157.20 ms |       66.60 ms | 🟢 2.16x faster       | 🔴 1.09x slower   |
+| `canine-bundle.glb`               |   7.40 ms |   4.60 ms |       12.10 ms | 🔴 1.61x slower       | 🟢 1.64x faster   |
+| `player-bundle.glb`               |  11.40 ms |   9.90 ms |        7.50 ms | 🔴 1.15x slower       | 🔴 1.52x slower   |
+| `static-bundle.glb`               |  56.60 ms |  93.60 ms |       51.30 ms | 🟢 1.65x faster       | 🔴 1.10x slower   |
+| `IridescentDishWithOlives.glb`    |  63.00 ms |  72.20 ms |       58.80 ms | 🟢 1.15x faster       | 🔴 1.07x slower   |
+| `LittlestTokyo.glb`               |  89.80 ms | 182.00 ms |       92.20 ms | 🟢 2.03x faster       | ⚪ even           |
+| `ShaderBall2.glb`                 |  16.30 ms |  20.10 ms |       13.60 ms | 🟢 1.23x faster       | 🔴 1.20x slower   |
+| `bath_day.glb`                    |  39.80 ms |  50.20 ms |       43.60 ms | 🟢 1.26x faster       | 🟢 1.10x faster   |
+| `duck.glb`                        |   3.20 ms |   3.00 ms |        1.90 ms | 🔴 1.07x slower       | 🔴 1.68x slower   |
+| `ferrari.glb`                     |  31.90 ms |  90.10 ms |       29.40 ms | 🟢 2.82x faster       | 🔴 1.09x slower   |
+| `forest_house.glb`                |  27.30 ms |  27.30 ms |       24.50 ms | ⚪ even               | 🔴 1.11x slower   |
+| `gears.glb`                       |   2.60 ms |   4.80 ms |        2.10 ms | 🟢 1.85x faster       | 🔴 1.24x slower   |
+| `kira.glb`                        | 259.20 ms | 251.90 ms |      226.80 ms | ⚪ even               | 🔴 1.14x slower   |
+| `minimalistic_modern_bedroom.glb` |  33.90 ms |  40.00 ms |       33.00 ms | 🟢 1.18x faster       | ⚪ even           |
+| `nemetona.glb`                    | 172.30 ms | 201.80 ms |      145.80 ms | 🟢 1.17x faster       | 🔴 1.18x slower   |
+| `pool.glb`                        |  49.10 ms |  48.40 ms |       42.70 ms | ⚪ even               | 🔴 1.15x slower   |
+| `rolex.glb`                       |  23.50 ms |  64.60 ms |       23.20 ms | 🟢 2.75x faster       | ⚪ even           |
+| `venice_mask.glb`                 |  73.70 ms | 166.30 ms |       77.30 ms | 🟢 2.26x faster       | ⚪ even           |
 
 Medians of independent runs carry roughly ±10% JIT/thermal noise (more for the loader wall
 clock) — treat this as the cross-decoder picture, not a micro-optimization ranking.
