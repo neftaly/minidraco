@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
@@ -47,6 +48,11 @@ const startBenchResultsServer = () => {
         const merged = { ...existing, [section]: data }
         writeFileSync(benchResultsPath, `${JSON.stringify(merged, null, 2)}\n`)
         console.log(`Saved ${section} benchmark results to BENCH.browser.json`)
+        // Re-render BENCH.md so its browser sections match the fresh JSON
+        spawn('bun', ['library/scripts/benchmd.ts'], {
+          cwd: fileURLToPath(new URL('..', import.meta.url)),
+          stdio: 'ignore',
+        }).on('error', () => console.warn('BENCH.md re-render failed (is bun on PATH?)'))
         res.writeHead(200, { 'content-type': 'application/json' }).end('{"ok":true}')
       } catch (error) {
         res.writeHead(500).end(String(error))
