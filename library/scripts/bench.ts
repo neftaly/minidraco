@@ -1,9 +1,10 @@
 // Benchmark: decode every Draco primitive of every bundle GLB and every
 // draco.js sample model with each decoder, several times, and report
-// per-file totals. Full runs also rewrite BENCH.md at the repo root.
+// per-file totals. Full runs also rewrite BENCH.md and BENCH.json at the
+// repo root; both are checked in so perf work can diff against them.
 //
-//   bun run bench            # all decoders, writes BENCH.md
-//   bun run bench --quick    # fewer iterations, doesn't touch BENCH.md
+//   bun run bench            # all decoders, writes BENCH.md + BENCH.json
+//   bun run bench --quick    # fewer iterations, doesn't touch the outputs
 import { writeFileSync } from 'node:fs'
 import { cpus } from 'node:os'
 import { resolve } from 'node:path'
@@ -111,11 +112,31 @@ for (const r of results) {
 }
 
 if (QUICK) {
-  console.log('\n(quick run — BENCH.md not updated)')
+  console.log('\n(quick run — BENCH.md/BENCH.json not updated)')
 } else {
   const benchMdPath = resolve(import.meta.dir, '../../BENCH.md')
+  const benchJsonPath = resolve(import.meta.dir, '../../BENCH.json')
   // Local date, YYYY-MM-DD (toISOString would be UTC)
   const date = new Date().toLocaleDateString('en-CA')
+
+  // Machine-readable results, checked into the repo so perf work can diff
+  // against the previous run (ms values rounded — sub-µs digits are noise)
+  const json = {
+    date,
+    runtime: `bun ${Bun.version}`,
+    engine: 'JavaScriptCore',
+    cpu: cpus()[0]?.model ?? 'unknown',
+    warmupRuns: WARMUP_RUNS,
+    timedRuns: TIMED_RUNS,
+    results: results.map(r => ({
+      file: r.file,
+      primitives: r.primitives,
+      points: r.points,
+      faces: r.faces,
+      medianMs: Object.fromEntries(Object.entries(r.medianMs).map(([k, v]) => [k, Number(v.toFixed(3))])),
+    })),
+  }
+  writeFileSync(benchJsonPath, `${JSON.stringify(json, null, 2)}\n`)
 
   // How minidraco compares against another decoder's time, as a human-readable
   // verdict. Differences within 5% are called even — that's inside run noise.
@@ -188,7 +209,7 @@ if (QUICK) {
   writeFileSync(benchMdPath, lines.join('\n'))
   // Let oxfmt own the final table padding — emoji column widths are hard to
   // reproduce by hand and the file must pass `oxfmt --check`
-  const oxfmt = Bun.spawnSync(['bunx', 'oxfmt', benchMdPath])
-  if (oxfmt.exitCode !== 0) console.warn(`oxfmt failed on BENCH.md: ${oxfmt.stderr.toString().trim()}`)
-  console.log(`\nWrote ${benchMdPath}`)
+  const oxfmt = Bun.spawnSync(['bunx', 'oxfmt', benchMdPath, benchJsonPath])
+  if (oxfmt.exitCode !== 0) console.warn(`oxfmt failed on bench outputs: ${oxfmt.stderr.toString().trim()}`)
+  console.log(`\nWrote ${benchMdPath} and ${benchJsonPath}`)
 }

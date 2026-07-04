@@ -1,0 +1,230 @@
+{
+  "date": "2026-07-05",
+  "runtime": "bun 1.3.14",
+  "engine": "JavaScriptCore",
+  "cpu": "Apple M3",
+  "warmupRuns": 3,
+  "timedRuns": 10,
+  "results": [
+    {
+      "file": "canine-bundle.glb",
+      "primitives": 1,
+      "points": 1064,
+      "faces": 532,
+      "medianMs": {
+        "minidraco": 0.685,
+        "draco.js": 0.891,
+        "draco3d (wasm)": 1.294
+      }
+    },
+    {
+      "file": "player-bundle.glb",
+      "primitives": 7,
+      "points": 5050,
+      "faces": 2544,
+      "medianMs": {
+        "minidraco": 2.387,
+        "draco.js": 2.385,
+        "draco3d (wasm)": 1.293
+      }
+    },
+    {
+      "file": "static-bundle.glb",
+      "primitives": 488,
+      "points": 291342,
+      "faces": 220879,
+      "medianMs": {
+        "minidraco": 48.176,
+        "draco.js": 51.311,
+        "draco3d (wasm)": 50.724
+      }
+    },
+    {
+      "file": "IridescentDishWithOlives.glb",
+      "primitives": 4,
+      "points": 14864,
+      "faces": 24448,
+      "medianMs": {
+        "minidraco": 4.186,
+        "draco.js": 4.155,
+        "draco3d (wasm)": 4.761
+      }
+    },
+    {
+      "file": "LittlestTokyo.glb",
+      "primitives": 71,
+      "points": 193125,
+      "faces": 141802,
+      "medianMs": {
+        "minidraco": 78.441,
+        "draco.js": 83.37,
+        "draco3d (wasm)": 76.127
+      }
+    },
+    {
+      "file": "ShaderBall2.glb",
+      "primitives": 3,
+      "points": 8377,
+      "faces": 13388,
+      "medianMs": {
+        "minidraco": 4.199,
+        "draco.js": 4.6,
+        "draco3d (wasm)": 5.214
+      }
+    },
+    {
+      "file": "bath_day.glb",
+      "primitives": 22,
+      "points": 21759,
+      "faces": 32158,
+      "medianMs": {
+        "minidraco": 5.435,
+        "draco.js": 5.89,
+        "draco3d (wasm)": 5.775
+      }
+    },
+    {
+      "file": "duck.glb",
+      "primitives": 1,
+      "points": 2277,
+      "faces": 4212,
+      "medianMs": {
+        "minidraco": 0.848,
+        "draco.js": 0.86,
+        "draco3d (wasm)": 1.128
+      }
+    },
+    {
+      "file": "ferrari.glb",
+      "primitives": 51,
+      "points": 337834,
+      "faces": 358788,
+      "medianMs": {
+        "minidraco": 65.811,
+        "draco.js": 62.828,
+        "draco3d (wasm)": 78.265
+      }
+    },
+    {
+      "file": "forest_house.glb",
+      "primitives": 12,
+      "points": 11924,
+      "faces": 10956,
+      "medianMs": {
+        "minidraco": 2.414,
+        "draco.js": 2.661,
+        "draco3d (wasm)": 2.672
+      }
+    },
+    {
+      "file": "gears.glb",
+      "primitives": 3,
+      "points": 23426,
+      "faces": 21696,
+      "medianMs": {
+        "minidraco": 3.117,
+        "draco.js": 3.007,
+        "draco3d (wasm)": 3.463
+      }
+    },
+    {
+      "file": "kira.glb",
+      "primitives": 43,
+      "points": 55486,
+      "faces": 51601,
+      "medianMs": {
+        "minidraco": 10.013,
+        "draco.js": 10.186,
+        "draco3d (wasm)": 12.213
+      }
+    },
+    {
+      "file": "minimalistic_modern_bedroom.glb",
+      "primitives": 4,
+      "points": 13884,
+      "faces": 10457,
+      "medianMs": {
+        "minidraco": 2.986,
+        "draco.js": 2.973,
+        "draco3d (wasm)": 3.282
+      }
+    },
+    {
+      "file": "nemetona.glb",
+      "primitives": 1,
+      "points": 349197,
+      "faces": 320352,
+      "medianMs": {
+        "minidraco": 134.568,
+        "draco.js": 146.592,
+        "draco3d (wasm)": 146.393
+      }
+    },
+    {
+      "file": "pool.glb",
+      "primitives": 2,
+      "points": 13501,
+      "faces": 22280,
+      "medianMs": {
+        "minidraco": 5,
+        "draco.js": 5.284,
+        "draco3d (wasm)": 4.203
+      }
+    },
+    {
+      "file": "rolex.glb",
+      "primitives": 24,
+      "points": 101560,
+      "faces": 120336,
+      "medianMs": {
+        "minidraco": 39.14,
+        "draco.js": 39.448,
+        "draco3d (wasm)": 41.233
+      }
+    },
+    {
+      "file": "venice_mask.glb",
+      "primitives": 5,
+      "points": 173876,
+      "faces": 295600,
+      "medianMs": {
+        "minidraco": 74.158,
+        "draco.js": 80.965,
+        "draco3d (wasm)": 81.207
+      }
+    },
+    {
+      "file": "bunny.drc",
+      "primitives": 1,
+      "points": 34834,
+      "faces": 69451,
+      "medianMs": {
+        "minidraco": 8.294,
+        "draco.js": 7.253,
+        "draco3d (wasm)": 4.278
+      }
+    },
+    {
+      "file": "car.drc",
+      "primitives": 1,
+      "points": 1856,
+      "faces": 1744,
+      "medianMs": {
+        "minidraco": 3.045,
+        "draco.js": 3.35,
+        "draco3d (wasm)": 0.137
+      }
+    },
+    {
+      "file": "duck.drc",
+      "primitives": 1,
+      "points": 2277,
+      "faces": 4212,
+      "medianMs": {
+        "minidraco": 1.071,
+        "draco.js": 0.857,
+        "draco3d (wasm)": 1.069
+      }
+    }
+  ]
+}

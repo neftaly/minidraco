@@ -15,26 +15,26 @@ decoder: 🟢 minidraco is faster, 🔴 minidraco is slower, ⚪ within 5% (run 
 
 | file                              | prims |   faces | minidraco |  draco.js | draco3d (wasm) | minidraco vs draco.js | minidraco vs wasm |
 | --------------------------------- | ----: | ------: | --------: | --------: | -------------: | --------------------- | ----------------- |
-| `canine-bundle.glb`               |     1 |     532 |   0.85 ms |   0.62 ms |        0.71 ms | 🔴 1.36x slower       | 🔴 1.19x slower   |
-| `player-bundle.glb`               |     7 |   2,544 |   2.32 ms |   2.25 ms |        1.33 ms | ⚪ even               | 🔴 1.74x slower   |
-| `static-bundle.glb`               |   488 | 220,879 |  49.35 ms |  51.20 ms |       49.64 ms | ⚪ even               | ⚪ even           |
-| `IridescentDishWithOlives.glb`    |     4 |  24,448 |   3.99 ms |   3.63 ms |        4.41 ms | 🔴 1.10x slower       | 🟢 1.10x faster   |
-| `LittlestTokyo.glb`               |    71 | 141,802 |  71.56 ms |  75.06 ms |       75.66 ms | ⚪ even               | 🟢 1.06x faster   |
-| `ShaderBall2.glb`                 |     3 |  13,388 |   4.48 ms |   4.49 ms |        5.20 ms | ⚪ even               | 🟢 1.16x faster   |
-| `bath_day.glb`                    |    22 |  32,158 |   5.63 ms |   5.73 ms |        5.68 ms | ⚪ even               | ⚪ even           |
-| `duck.glb`                        |     1 |   4,212 |   0.81 ms |   0.84 ms |        1.10 ms | ⚪ even               | 🟢 1.36x faster   |
-| `ferrari.glb`                     |    51 | 358,788 |  63.48 ms |  61.79 ms |       77.15 ms | ⚪ even               | 🟢 1.22x faster   |
-| `forest_house.glb`                |    12 |  10,956 |   2.61 ms |   2.52 ms |        3.93 ms | ⚪ even               | 🟢 1.51x faster   |
-| `gears.glb`                       |     3 |  21,696 |   3.32 ms |   3.03 ms |        3.49 ms | 🔴 1.10x slower       | 🟢 1.05x faster   |
-| `kira.glb`                        |    43 |  51,601 |  10.27 ms |  10.39 ms |       11.40 ms | ⚪ even               | 🟢 1.11x faster   |
-| `minimalistic_modern_bedroom.glb` |     4 |  10,457 |   2.75 ms |   2.71 ms |        3.10 ms | ⚪ even               | 🟢 1.13x faster   |
-| `nemetona.glb`                    |     1 | 320,352 | 135.71 ms | 135.49 ms |      141.19 ms | ⚪ even               | ⚪ even           |
-| `pool.glb`                        |     2 |  22,280 |   5.02 ms |   5.06 ms |        3.94 ms | ⚪ even               | 🔴 1.28x slower   |
-| `rolex.glb`                       |    24 | 120,336 |  37.54 ms |  36.89 ms |       42.23 ms | ⚪ even               | 🟢 1.12x faster   |
-| `venice_mask.glb`                 |     5 | 295,600 |  75.40 ms |  78.20 ms |       80.52 ms | ⚪ even               | 🟢 1.07x faster   |
-| `bunny.drc`                       |     1 |  69,451 |   8.51 ms |   8.44 ms |        4.23 ms | ⚪ even               | 🔴 2.01x slower   |
-| `car.drc`                         |     1 |   1,744 |   5.03 ms |   2.70 ms |        0.13 ms | 🔴 1.86x slower       | 🔴 38.65x slower  |
-| `duck.drc`                        |     1 |   4,212 |   1.14 ms |   1.18 ms |        1.14 ms | ⚪ even               | ⚪ even           |
+| `canine-bundle.glb`               |     1 |     532 |   0.69 ms |   0.89 ms |        1.29 ms | 🟢 1.30x faster       | 🟢 1.89x faster   |
+| `player-bundle.glb`               |     7 |   2,544 |   2.39 ms |   2.38 ms |        1.29 ms | ⚪ even               | 🔴 1.85x slower   |
+| `static-bundle.glb`               |   488 | 220,879 |  48.18 ms |  51.31 ms |       50.72 ms | 🟢 1.07x faster       | 🟢 1.05x faster   |
+| `IridescentDishWithOlives.glb`    |     4 |  24,448 |   4.19 ms |   4.15 ms |        4.76 ms | ⚪ even               | 🟢 1.14x faster   |
+| `LittlestTokyo.glb`               |    71 | 141,802 |  78.44 ms |  83.37 ms |       76.13 ms | 🟢 1.06x faster       | ⚪ even           |
+| `ShaderBall2.glb`                 |     3 |  13,388 |   4.20 ms |   4.60 ms |        5.21 ms | 🟢 1.10x faster       | 🟢 1.24x faster   |
+| `bath_day.glb`                    |    22 |  32,158 |   5.44 ms |   5.89 ms |        5.78 ms | 🟢 1.08x faster       | 🟢 1.06x faster   |
+| `duck.glb`                        |     1 |   4,212 |   0.85 ms |   0.86 ms |        1.13 ms | ⚪ even               | 🟢 1.33x faster   |
+| `ferrari.glb`                     |    51 | 358,788 |  65.81 ms |  62.83 ms |       78.26 ms | ⚪ even               | 🟢 1.19x faster   |
+| `forest_house.glb`                |    12 |  10,956 |   2.41 ms |   2.66 ms |        2.67 ms | 🟢 1.10x faster       | 🟢 1.11x faster   |
+| `gears.glb`                       |     3 |  21,696 |   3.12 ms |   3.01 ms |        3.46 ms | ⚪ even               | 🟢 1.11x faster   |
+| `kira.glb`                        |    43 |  51,601 |  10.01 ms |  10.19 ms |       12.21 ms | ⚪ even               | 🟢 1.22x faster   |
+| `minimalistic_modern_bedroom.glb` |     4 |  10,457 |   2.99 ms |   2.97 ms |        3.28 ms | ⚪ even               | 🟢 1.10x faster   |
+| `nemetona.glb`                    |     1 | 320,352 | 134.57 ms | 146.59 ms |      146.39 ms | 🟢 1.09x faster       | 🟢 1.09x faster   |
+| `pool.glb`                        |     2 |  22,280 |   5.00 ms |   5.28 ms |        4.20 ms | 🟢 1.06x faster       | 🔴 1.19x slower   |
+| `rolex.glb`                       |    24 | 120,336 |  39.14 ms |  39.45 ms |       41.23 ms | ⚪ even               | 🟢 1.05x faster   |
+| `venice_mask.glb`                 |     5 | 295,600 |  74.16 ms |  80.97 ms |       81.21 ms | 🟢 1.09x faster       | 🟢 1.10x faster   |
+| `bunny.drc`                       |     1 |  69,451 |   8.29 ms |   7.25 ms |        4.28 ms | 🔴 1.14x slower       | 🔴 1.94x slower   |
+| `car.drc`                         |     1 |   1,744 |   3.04 ms |   3.35 ms |        0.14 ms | 🟢 1.10x faster       | 🔴 22.15x slower  |
+| `duck.drc`                        |     1 |   4,212 |   1.07 ms |   0.86 ms |        1.07 ms | 🔴 1.25x slower       | ⚪ even           |
 
 Medians of independent runs still carry roughly ±10% JIT/thermal noise — treat this as the
 cross-decoder picture, not a micro-optimization ranking. V8 (browsers) ranks the decoders

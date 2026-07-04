@@ -145,6 +145,37 @@ const RunButton = ({ running, onClick, label }: { running: boolean; onClick: () 
   </button>
 )
 
+// Copies the results in the same shape as BENCH.json (plus browser metadata)
+// so V8 runs can be pasted into the repo / diffed against previous ones
+const CopyJsonButton = ({ section, config, rows }: { section: string; config: object; rows: BenchRow[] }) => {
+  const [copied, setCopied] = useState(false)
+  if (rows.length === 0) return null
+
+  const copy = () => {
+    const json = {
+      section,
+      date: new Date().toLocaleDateString('en-CA'),
+      runtime: navigator.userAgent,
+      ...config,
+      results: rows.map(row => ({
+        file: row.model,
+        ...(row.primitives === undefined ? {} : { primitives: row.primitives, faces: row.faces }),
+        medianMs: Object.fromEntries(Object.entries(row.medianMs).map(([k, v]) => [k, Number(v.toFixed(3))])),
+      })),
+    }
+    navigator.clipboard.writeText(`${JSON.stringify(json, null, 2)}\n`).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <button className="mb-4 rounded bg-neutral-700 px-3 py-1.5 text-sm font-medium hover:bg-neutral-600" onClick={copy}>
+      {copied ? 'Copied!' : 'Copy JSON'}
+    </button>
+  )
+}
+
 // --- Raw single-threaded decode benchmark ---
 
 const RawBenchSection = () => {
@@ -220,6 +251,13 @@ const RawBenchSection = () => {
       <RunButton running={running} onClick={run} label="Run raw benchmark" />
       <p className="mb-4 text-sm text-neutral-400">{status}</p>
       <BenchTable rows={rows} />
+      {!running && (
+        <CopyJsonButton
+          section="raw-decode-main-thread"
+          config={{ warmupRuns: RAW_WARMUP_RUNS, timedRuns: RAW_TIMED_RUNS }}
+          rows={rows}
+        />
+      )}
     </section>
   )
 }
@@ -297,6 +335,13 @@ const LoaderBenchSection = () => {
       <RunButton running={running} onClick={run} label="Run loader benchmark" />
       <p className="mb-4 text-sm text-neutral-400">{status}</p>
       <BenchTable rows={rows} />
+      {!running && (
+        <CopyJsonButton
+          section="gltfloader-wall-clock"
+          config={{ warmupRuns: LOADER_WARMUP_RUNS, timedRuns: LOADER_TIMED_RUNS }}
+          rows={rows}
+        />
+      )}
     </section>
   )
 }
