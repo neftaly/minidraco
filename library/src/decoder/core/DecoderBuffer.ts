@@ -25,7 +25,7 @@ class BitDecoder {
   }
 
   getBits(nbits: number): number | undefined {
-    if (nbits > 32) return undefined
+    if (!Number.isInteger(nbits) || nbits < 0 || nbits > 32) return undefined
     const buf = this._bitBuffer!
     let off = this._bitOffset
     const byteOffset = off >> 3
@@ -65,6 +65,9 @@ class BitDecoder {
       bitsRead += bitsToRead
       currOff += bitsToRead
     }
+    if (bitsRead !== nbits) {
+      return undefined
+    }
     this._bitOffset = currOff
     return value
   }
@@ -98,7 +101,8 @@ export class DecoderBuffer {
       this._data = new Uint8Array(data)
     }
     this._dataView = new DataView(this._data.buffer, this._data.byteOffset, this._data.byteLength)
-    this._dataSize = dataSize !== undefined ? dataSize : this._data.length
+    const requestedSize = dataSize === undefined ? this._data.length : Number.isNaN(dataSize) ? 0 : Math.trunc(dataSize)
+    this._dataSize = Math.max(0, Math.min(requestedSize, this._data.length))
     this._pos = 0
     if (version !== undefined) {
       this._bitstreamVersion = version
@@ -158,6 +162,7 @@ export class DecoderBuffer {
   }
 
   decodeBytes(size: number): Uint8Array | undefined {
+    if (!Number.isSafeInteger(size) || size < 0) return undefined
     if (this._pos + size > this._dataSize) return undefined
     const result = this._data!.slice(this._pos, this._pos + size)
     this._pos += size
@@ -167,6 +172,7 @@ export class DecoderBuffer {
   // Zero-copy variant of decodeBytes: a view into the stream, only valid until
   // the caller's next chance to mutate the buffer — copy out before keeping it.
   decodeBytesView(size: number): Uint8Array | undefined {
+    if (!Number.isSafeInteger(size) || size < 0) return undefined
     if (this._pos + size > this._dataSize) return undefined
     const result = this._data!.subarray(this._pos, this._pos + size)
     this._pos += size

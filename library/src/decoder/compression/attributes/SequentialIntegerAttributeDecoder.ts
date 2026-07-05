@@ -4,6 +4,7 @@ import { GeometryAttribute } from '../../attributes/GeometryAttribute'
 import { PointAttribute } from '../../attributes/PointAttribute'
 import { convertSymbolsToSignedInts } from '../../core/BitUtils'
 import { DataType, dataTypeLength } from '../../core/DracoTypes'
+import { scratchInt32 } from '../../core/ScratchArena'
 import { PredictionSchemeMethod, PredictionSchemeTransformType } from '../config/CompressionShared'
 import { decodeSymbols } from '../entropy/SymbolDecoding'
 import { createPredictionSchemeForDecoder } from './prediction_schemes/PredictionSchemeDecoderFactory'
@@ -97,23 +98,27 @@ class SequentialIntegerAttributeDecoder extends SequentialAttributeDecoder {
         if (portableAttributeData.byteLength < 4 * numValues) {
           return false
         }
-        const bytes = buffer.decodeBytes(4 * numValues)
+        const bytes = buffer.decodeBytesView(4 * numValues)
         if (bytes === undefined) return false
         const srcView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
         for (let i = 0; i < numValues; i++) {
           portableAttributeData[i] = srcView.getInt32(i * 4, true)
         }
       } else {
+        if (numBytes < 1 || numBytes > dataTypeLength(DataType.INT32)) {
+          return false
+        }
         if (buffer.remainingSize < numBytes * numValues) {
           return false
         }
+        const bytes = buffer.decodeBytesView(numBytes * numValues)
+        if (bytes === undefined) return false
         for (let i = 0; i < numValues; i++) {
-          const valueBytes = buffer.decodeBytes(numBytes)
-          if (valueBytes === undefined) return false
           // Little-endian; |= with << sign-extends into a 32-bit int.
           let val = 0
+          const offset = i * numBytes
           for (let b = 0; b < numBytes; b++) {
-            val |= valueBytes[b] << (b * 8)
+            val |= bytes[offset + b] << (b * 8)
           }
           portableAttributeData[i] = val
         }
@@ -216,7 +221,14 @@ class SequentialIntegerAttributeDecoder extends SequentialAttributeDecoder {
     )
     const portAtt = new PointAttribute(ga)
     portAtt.setIdentityMapping()
-    portAtt.reset(numEntries)
+    const total = numEntries * numComponents
+    if (total === 0) {
+      portAtt.reset(numEntries)
+    } else {
+      const storage = scratchInt32(total)
+      const bytes = new Uint8Array(storage.buffer, storage.byteOffset, storage.byteLength)
+      portAtt.resetWithExternalBuffer(numEntries, bytes)
+    }
     portAtt.uniqueId = this.attribute!.uniqueId
     this.setPortableAttribute(portAtt)
   }

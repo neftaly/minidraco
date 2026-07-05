@@ -1,3 +1,4 @@
+import { formatMs, summarizeSamples } from './bench-core'
 // Dev-loop micro-benchmark: minidraco only, min/p25/median of 30 runs after
 // warmup. Min time is the most stable metric for comparing code versions;
 // the cross-decoder bench.ts is for headline numbers, not for optimization
@@ -29,6 +30,6 @@ for (const model of models) {
     for (const p of primitives) decodeWithMinidraco(p)
     times.push(performance.now() - start)
   }
-  times.sort((a, b) => a - b)
-  console.log(`${name}  min: ${times[0].toFixed(2)}  p25: ${times[7].toFixed(2)}  median: ${times[15].toFixed(2)}`)
+  const stats = summarizeSamples(times)
+  console.log(`${name}  min: ${formatMs(stats.min)}  p25: ${formatMs(stats.p25)}  median: ${formatMs(stats.median)}`)
 }

@@ -17,7 +17,6 @@ export class RAnsSymbolDecoder {
   uniqueSymbolsBitLength_: number
   ransPrecisionBits_: number
   ransPrecision_: number
-  probabilityTable_: Uint32Array | null
   numSymbols_: number
   ans_: RAnsDecoder
 
@@ -25,7 +24,6 @@ export class RAnsSymbolDecoder {
     this.uniqueSymbolsBitLength_ = uniqueSymbolsBitLength
     this.ransPrecisionBits_ = computeRAnsPrecisionFromUniqueSymbolsBitLength(uniqueSymbolsBitLength)
     this.ransPrecision_ = 1 << this.ransPrecisionBits_
-    this.probabilityTable_ = null
     this.numSymbols_ = 0
     this.ans_ = new RAnsDecoder(this.ransPrecisionBits_)
   }
@@ -50,11 +48,10 @@ export class RAnsSymbolDecoder {
     }
 
     const numSymbols = this.numSymbols_
-    const probabilityTable = new Uint32Array(numSymbols)
-    this.probabilityTable_ = probabilityTable
     if (numSymbols === 0) {
       return true
     }
+    const probabilityTable = this.ans_.ransAllocateTables(numSymbols)
 
     // Read via a local cursor instead of a decodeUint8() call per byte.
     const data = buffer.data!
@@ -72,7 +69,7 @@ export class RAnsSymbolDecoder {
         if (i + offset >= numSymbols) {
           return false
         }
-        // The run's probabilities stay 0; the freshly allocated table already is.
+        probabilityTable.fill(0, i, i + offset + 1)
         i += offset
       } else {
         const extraBytes = token
@@ -87,7 +84,7 @@ export class RAnsSymbolDecoder {
     }
     buffer.advance(pos - startPos)
 
-    if (!this.ans_.ransBuildLookUpTable(this.probabilityTable_, this.numSymbols_)) {
+    if (!this.ans_.ransBuildLookUpTable(this.numSymbols_)) {
       return false
     }
     return true

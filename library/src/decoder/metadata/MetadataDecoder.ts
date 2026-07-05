@@ -87,7 +87,7 @@ class MetadataDecoder {
     if (dataSize > this.buffer_!.remainingSize) {
       return false
     }
-    return this.buffer_!.decodeBytes(dataSize) !== undefined
+    return this.buffer_!.decodeBytesView(dataSize) !== undefined
   }
 
   // Skips a name (uint8 length prefix followed by that many bytes).
@@ -99,7 +99,7 @@ class MetadataDecoder {
     if (nameLen === 0) {
       return true
     }
-    return this.buffer_!.decodeBytes(nameLen) !== undefined
+    return this.buffer_!.decodeBytesView(nameLen) !== undefined
   }
 }
 

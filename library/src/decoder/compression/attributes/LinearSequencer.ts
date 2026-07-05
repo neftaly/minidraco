@@ -1,5 +1,7 @@
 // Ported from draco.js src/compression/attributes/LinearSequencer.js (MIT)
 
+import { scratchInt32 } from '../../core/ScratchArena'
+
 import type { PointAttribute } from '../../attributes/PointAttribute'
 
 // Sequencer that preserves point order: generates the sequence [0, numPoints-1].
@@ -18,7 +20,7 @@ class LinearSequencer {
     if (this._numPoints < 0) {
       return false
     }
-    const ids = new Int32Array(this._numPoints)
+    const ids = this._numPoints === 0 ? new Int32Array(0) : scratchInt32(this._numPoints)
     for (let i = 0; i < this._numPoints; ++i) {
       ids[i] = i
     }

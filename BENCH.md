@@ -1,6 +1,6 @@
 # Benchmark results
 
-<!-- Generated from BENCH.json + BENCH.browser.json by library/scripts/benchmd.ts — do not edit by hand. -->
+<!-- Generated from BENCH*.json by library/scripts/benchmd.ts — do not edit by hand. -->
 
 Median decode time per file (every Draco primitive decoded sequentially per run). The corpus
 is the production bundle GLBs from `example/public/models` plus the sample models shipped in
@@ -100,6 +100,55 @@ texture decode and scene-graph setup. Median of 5 runs after 1 warmup, GLBs only
 | `pool.glb`                        |  49.10 ms |  48.40 ms |       42.70 ms | ⚪ even               | 🔴 1.15x slower   |
 | `rolex.glb`                       |  23.50 ms |  64.60 ms |       23.20 ms | 🟢 2.75x faster       | ⚪ even           |
 | `venice_mask.glb`                 |  73.70 ms | 166.30 ms |       77.30 ms | 🟢 2.26x faster       | ⚪ even           |
+
+## Allocation / GC proxy
+
+JavaScript runtimes do not expose total allocation counters, so this records heap and
+ArrayBuffer growth before forced GC, retained deltas after forced GC, and forced-GC
+pause time. Median of 15 runs after 3 warmups on the production bundle GLBs.
+
+- Date: 2026-07-05
+- Runtime: bun 1.3.14 (JavaScriptCore)
+- CPU: 11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz
+
+| file                | mode           | prims |   median |    heap+ | heap retained | arraybuf+ | arraybuf retained | gc median |
+| ------------------- | -------------- | ----: | -------: | -------: | ------------: | --------: | ----------------: | --------: |
+| `canine-bundle.glb` | decode         |     1 |  1.35 ms |      0 B |           0 B |  27.63 KB |               0 B |   1.52 ms |
+| `canine-bundle.glb` | decode+extract |     1 |  0.86 ms |      0 B |           0 B |  33.97 KB |               0 B |   1.59 ms |
+| `player-bundle.glb` | decode         |     7 |  2.44 ms |      0 B |           0 B | 131.55 KB |               0 B |   2.26 ms |
+| `player-bundle.glb` | decode+extract |     7 |  2.17 ms |      0 B |           0 B | 162.13 KB |               0 B |   1.92 ms |
+| `static-bundle.glb` | decode         |   488 | 69.87 ms | 11.96 KB |      11.96 KB |   6.35 MB |               0 B |   3.13 ms |
+| `static-bundle.glb` | decode+extract |   488 | 64.78 ms |      0 B |           0 B |   8.93 MB |               0 B |   3.30 ms |
+
+## Deployed size
+
+Minified browser bundles are built from `library/dist` with `three` externalized for
+`minidraco/three`. The worker is a separate module-worker asset referenced by
+`new URL("./worker.js", import.meta.url)`.
+
+- Date: 2026-07-05
+- Runtime: bun 1.3.14
+
+Package artifacts:
+
+| file          |       raw |     gzip |   brotli |
+| ------------- | --------: | -------: | -------: |
+| `index.d.ts`  |   8.20 KB |  1.98 KB |  1.77 KB |
+| `index.js`    | 228.05 KB | 39.90 KB | 33.23 KB |
+| `three.d.ts`  |   7.76 KB |  1.91 KB |  1.73 KB |
+| `three.js`    |  12.22 KB |  3.72 KB |  3.24 KB |
+| `worker.d.ts` |      13 B |     33 B |     17 B |
+| `worker.js`   | 232.05 KB | 42.11 KB | 35.01 KB |
+
+Browser-deployed bundles:
+
+| file                                  |       raw |     gzip |   brotli |
+| ------------------------------------- | --------: | -------: | -------: |
+| `minidraco graph.min.js`              | 102.57 KB | 26.20 KB | 22.50 KB |
+| `minidraco/three main graph.min.js`   |   6.21 KB |  2.52 KB |  2.22 KB |
+| `minidraco worker graph.min.js`       | 105.28 KB | 27.98 KB | 24.13 KB |
+| `minidraco/three main + worker graph` | 111.49 KB | 30.50 KB | 26.35 KB |
+| `minidraco/three sync fallback graph` | 108.78 KB | 28.72 KB | 24.72 KB |
 
 Medians of independent runs carry roughly ±10% JIT/thermal noise (more for the loader wall
 clock) — treat this as the cross-decoder picture, not a micro-optimization ranking.

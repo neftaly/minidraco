@@ -1,7 +1,7 @@
 // Ported from draco.js src/compression/mesh/MeshEdgebreakerDecoderImpl.js (MIT)
 
 import { DecoderBuffer } from '../../core/DecoderBuffer'
-import { scratchInt32 } from '../../core/ScratchArena'
+import { scratchInt32, scratchUint8, scratchUint8Zeroed } from '../../core/ScratchArena'
 import { decodeVarint } from '../../core/VarintDecoding'
 import { MeshAttributeElementType } from '../../mesh/Mesh'
 import { MeshAttributeCornerTable } from '../../mesh/MeshAttributeCornerTable'
@@ -252,7 +252,7 @@ class MeshEdgebreakerDecoderImpl {
     this._attributeData = []
     for (let i = 0; i < numAttributeData; ++i) {
       const ad = new AttributeData()
-      ad.attributeSeamCorners = new Int32Array(numFaces * 3)
+      ad.attributeSeamCorners = scratchInt32(numFaces * 3)
       ad.numSeamCorners = 0
       this._attributeData.push(ad)
     }
@@ -264,7 +264,7 @@ class MeshEdgebreakerDecoderImpl {
     // All vertices start as holes (boundaries). Uint8Array (1=hole) keeps the
     // per-vertex reads/writes monomorphic; vertex count never exceeds this
     // length (enforced via maxNumVertices), so fixed-size storage is safe.
-    this._isVertHole = new Uint8Array(this._numEncodedVertices + numEncodedSplitSymbols).fill(1)
+    this._isVertHole = scratchUint8(this._numEncodedVertices + numEncodedSplitSymbols).fill(1)
 
     if (this._decodeHoleAndTopologySplitEvents(this._decoder!.buffer()!) === -1) {
       return false
@@ -724,7 +724,11 @@ class MeshEdgebreakerDecoderImpl {
       // Split edges come from a direct bit decoder.
       decoderBuffer.startBitDecoding(false)
       for (let i = 0; i < numTopologySplits; ++i) {
-        const edgeData = decoderBuffer.decodeLeastSignificantBits32(1)!
+        const edgeData = decoderBuffer.decodeLeastSignificantBits32(1)
+        if (edgeData === undefined) {
+          decoderBuffer.endBitDecoding()
+          return -1
+        }
         this._topologySplitData[i].sourceEdge = edgeData & 1
       }
       decoderBuffer.endBitDecoding()
@@ -794,7 +798,7 @@ class MeshEdgebreakerDecoderImpl {
     const attributeData = this._attributeData
     const numAttrData = attributeData.length
     let numPoints = 0
-    const cornerToPointMap = new Int32Array(ct.numCorners())
+    const cornerToPointMap = scratchInt32(ct.numCorners()).fill(0)
 
     const numVertices = ct.numVertices()
     // Flat connectivity for the inlined swingRight ring walk and per-attribute
@@ -817,7 +821,7 @@ class MeshEdgebreakerDecoderImpl {
     if (numAttrData === 1) {
       anyAttVertexOnSeam = attVertexOnSeam[0]
     } else {
-      anyAttVertexOnSeam = new Uint8Array(numVertices)
+      anyAttVertexOnSeam = scratchUint8Zeroed(numVertices)
       for (let i = 0; i < numAttrData; ++i) {
         const attSeam = attVertexOnSeam[i]
         for (let v = 0; v < numVertices; ++v) {
@@ -967,8 +971,8 @@ class MeshAttributeIndicesEncodingData {
   init(numVertices: number): void {
     // Int32Array (non-negative data indices) keeps the hot prediction-lookup
     // reads monomorphic.
-    this._vertexToEncodedAttributeValueIndexMap = new Int32Array(numVertices)
-    this._encodedAttributeValueIndexToCornerMap = new Int32Array(numVertices)
+    this._vertexToEncodedAttributeValueIndexMap = scratchInt32(numVertices).fill(0)
+    this._encodedAttributeValueIndexToCornerMap = scratchInt32(numVertices).fill(0)
     this._numValues = 0
   }
 
@@ -1041,9 +1045,9 @@ class CornerTable {
     // C++ reserve() allocates capacity but keeps size 0; vertices are added
     // incrementally via addNewVertex().
     this._numVertices = 0
-    this._cornerToVertex = new Int32Array(this._numCorners).fill(-1)
-    this._oppositeCorners = new Int32Array(this._numCorners).fill(-1)
-    this._vertexCorners = new Int32Array(numVertices).fill(-1)
+    this._cornerToVertex = scratchInt32(this._numCorners).fill(-1)
+    this._oppositeCorners = scratchInt32(this._numCorners).fill(-1)
+    this._vertexCorners = scratchInt32(numVertices).fill(-1)
     return true
   }
 
@@ -1098,7 +1102,7 @@ class CornerTable {
     this._numVertices++
     // Array pre-allocated in reset(); extend only when capacity is exceeded.
     if (newVertex >= this._vertexCorners!.length) {
-      const newArr = new Int32Array(this._vertexCorners!.length + 64)
+      const newArr = scratchInt32(this._vertexCorners!.length + 64)
       newArr.fill(-1)
       newArr.set(this._vertexCorners!)
       this._vertexCorners = newArr

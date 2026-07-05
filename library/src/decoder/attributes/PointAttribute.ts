@@ -91,6 +91,21 @@ class PointAttribute extends GeometryAttribute {
     return true
   }
 
+  resetWithExternalBuffer(numAttributeValues: number, data: Uint8Array): boolean {
+    if (this._attributeBuffer === null) {
+      this._attributeBuffer = new DataBuffer()
+    }
+    const entrySize = dataTypeLength(this.dataType) * this.numComponents
+    const byteLength = numAttributeValues * entrySize
+    if (byteLength < 0 || data.byteLength < byteLength) {
+      return false
+    }
+    this._attributeBuffer.attach(data.byteLength === byteLength ? data : data.subarray(0, byteLength))
+    this.resetBuffer(this._attributeBuffer, entrySize, 0)
+    this._numUniqueEntries = numAttributeValues
+    return true
+  }
+
   get size(): number {
     return this._numUniqueEntries
   }

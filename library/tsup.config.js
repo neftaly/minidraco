@@ -1,25 +1,39 @@
 import { defineConfig } from 'tsup'
 
-// Two separate builds instead of one multi-entry build: when entries share
-// modules (the decoder core), tsup's dts bundler hoists the shared types into
-// a content-hashed chunk (Mesh-<hash>.d.ts). Building `three` on its own makes
-// each d.ts self-contained — the types are duplicated structurally, which TS
-// treats as identical.
+// JS and d.ts are split into separate passes. `minidraco/three` stays
+// decomplected from the decoder core by lazy-importing `minidraco`, but the
+// worker is emitted in its own no-splitting JS pass. Next/Turbopack deploys
+// worker URLs as media assets and can miss sibling chunks imported by that
+// worker asset, so worker.js must be self-contained.
+//
+// The d.ts passes stay separate so tsup does not hoist shared public types into
+// a content-hashed `Mesh-<hash>.d.ts` file.
 export default defineConfig([
   {
-    // `minidraco` (pure decoder, no `three` import) and the self-contained
-    // module worker spawned by MiniDRACOLoader's pool.
-    entry: { index: 'src/index.ts', worker: 'src/worker.ts' },
+    entry: { index: 'src/index.ts', three: 'src/three/index.ts' },
     clean: true,
     format: ['esm'],
-    dts: true,
+    dts: false,
+    splitting: true,
+    external: ['three'],
+  },
+  {
+    entry: { worker: 'src/worker.ts' },
+    format: ['esm'],
+    dts: false,
     splitting: false,
   },
   {
-    // `minidraco/three` — the DRACOLoader drop-in built on top of the core.
+    entry: { index: 'src/index.ts', worker: 'src/worker.ts' },
+    format: ['esm'],
+    dts: { only: true },
+    splitting: false,
+  },
+  {
     entry: { three: 'src/three/index.ts' },
     format: ['esm'],
-    dts: true,
+    dts: { only: true },
     splitting: false,
+    external: ['three'],
   },
 ])

@@ -12,10 +12,14 @@
 
 const freeInt32: Int32Array[] = []
 const freeUint8: Uint8Array[] = []
+const freeUint32: Uint32Array[] = []
 const borrowedInt32: Int32Array[] = []
 const borrowedUint8: Uint8Array[] = []
+const borrowedUint32: Uint32Array[] = []
 
-const acquire = <T extends Int32Array | Uint8Array>(free: T[], borrowed: T[], size: number): T | null => {
+type ScratchArray = Int32Array | Uint8Array | Uint32Array
+
+const acquire = <T extends ScratchArray>(free: T[], borrowed: T[], size: number): T | null => {
   for (let i = free.length - 1; i >= 0; --i) {
     const buffer = free[i]
     if (buffer.length >= size) {
@@ -37,6 +41,24 @@ export const scratchInt32 = (size: number): Int32Array => {
   return fresh
 }
 
+// Exact-size view over a pooled buffer; contents are arbitrary.
+export const scratchUint32 = (size: number): Uint32Array => {
+  const pooled = acquire(freeUint32, borrowedUint32, size)
+  if (pooled !== null) return pooled.subarray(0, size)
+  const fresh = new Uint32Array(size)
+  borrowedUint32.push(fresh)
+  return fresh
+}
+
+// Exact-size view over a pooled buffer; contents are arbitrary.
+export const scratchUint8 = (size: number): Uint8Array => {
+  const pooled = acquire(freeUint8, borrowedUint8, size)
+  if (pooled !== null) return pooled.subarray(0, size)
+  const fresh = new Uint8Array(size)
+  borrowedUint8.push(fresh)
+  return fresh
+}
+
 // Exact-size view over a pooled buffer, cleared to 0.
 export const scratchUint8Zeroed = (size: number): Uint8Array => {
   const pooled = acquire(freeUint8, borrowedUint8, size)
@@ -54,8 +76,13 @@ export const scratchUint8Zeroed = (size: number): Uint8Array => {
 // buffer past this point — it runs when the decode's result mesh no longer
 // references any of them (result data lives in attribute buffers / faces_).
 export const releaseScratch = (): void => {
-  for (const buffer of borrowedInt32) freeInt32.push(buffer)
-  for (const buffer of borrowedUint8) freeUint8.push(buffer)
+  // Keep the next decode's LIFO acquisition aligned with the previous decode's
+  // allocation order. Releasing in borrow order would make repeated decodes scan
+  // most of the free list for every first-fit lookup.
+  for (let i = borrowedInt32.length - 1; i >= 0; --i) freeInt32.push(borrowedInt32[i])
+  for (let i = borrowedUint8.length - 1; i >= 0; --i) freeUint8.push(borrowedUint8[i])
+  for (let i = borrowedUint32.length - 1; i >= 0; --i) freeUint32.push(borrowedUint32[i])
   borrowedInt32.length = 0
   borrowedUint8.length = 0
+  borrowedUint32.length = 0
 }

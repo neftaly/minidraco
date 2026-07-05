@@ -27,6 +27,10 @@ export class DataBuffer {
     this._resize(newSize)
   }
 
+  attach(data: Uint8Array): void {
+    this._data = data
+  }
+
   write(bytePos: number, inArray: Uint8Array | ArrayBufferView | ArrayBuffer, dataSize: number): void {
     // Fast path: the common caller passes a Uint8Array of exactly dataSize bytes.
     // Avoid allocating a wrapper view per value (dominates storage time / GC pressure).

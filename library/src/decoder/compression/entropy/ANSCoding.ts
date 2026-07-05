@@ -37,7 +37,13 @@ export class AnsDecoder {
 
 // offset is the number of encoded bytes. Returns 0 on success, 1 on error.
 export function ansReadInit(ans: AnsDecoder, buf: Uint8Array, offset: number, base: number = 0): number {
-  if (offset - base < 1) {
+  if (
+    !Number.isSafeInteger(offset) ||
+    !Number.isSafeInteger(base) ||
+    base < 0 ||
+    offset > buf.length ||
+    offset - base < 1
+  ) {
     return 1
   }
   ans.buf = buf
@@ -131,7 +137,13 @@ export class RAnsDecoder {
   // buffer with absolute offsets avoids a subarray allocation per init.
   // Returns 0 on success, non-zero on error.
   readInit(buf: Uint8Array, offset: number, base: number = 0): number {
-    if (offset - base < 1) {
+    if (
+      !Number.isSafeInteger(offset) ||
+      !Number.isSafeInteger(base) ||
+      base < 0 ||
+      offset > buf.length ||
+      offset - base < 1
+    ) {
       return 1
     }
     this.buf = buf
@@ -153,6 +165,9 @@ export class RAnsDecoder {
       this.bufOffset = offset - 3
       this.state = memGetLe24(buf, offset - 3) & 0x3fffff
     } else if (x === 3) {
+      if (offset - base < 4) {
+        return 1
+      }
       this.bufOffset = offset - 4
       this.state = memGetLe32(buf, offset - 4) & 0x3fffffff
     } else {
@@ -286,26 +301,32 @@ export class RAnsDecoder {
     this.bufOffset = bufOffset
   }
 
-  // Builds the ransPrecision-entry lookup table. Returns false on bad input data.
-  ransBuildLookUpTable(tokenProbs: Uint32Array, numSymbols: number): boolean {
+  ransAllocateTables(numSymbols: number): Uint32Array {
     // lutTable is indexed by `rem` (random in [0, ransPrecision)), so it's the
     // hottest random read in decodeSymbols()/ransRead(). Its values are symbol
     // ids (< numSymbols), so pick the narrowest element type that holds them:
     // shrinking the table (up to 4x) keeps that random access closer to cache.
     const LutArray = numSymbols <= 256 ? Uint8Array : numSymbols <= 65536 ? Uint16Array : Uint32Array
-    // Pooled buffers may be oversized; every slot in the used range is written
-    // below (cumProb must land exactly on ransPrecision), so no clearing needed.
-    const lutTable = acquirePooled(LutArray as new (length: number) => Uint8Array, this.ransPrecision)
+    this.lutTable = acquirePooled(LutArray as new (length: number) => Uint8Array, this.ransPrecision)
     const probTable = acquirePooled(Uint32Array, numSymbols)
-    const cumProbTable = acquirePooled(Uint32Array, numSymbols)
-    this.lutTable = lutTable
     this.probTable = probTable
-    this.cumProbTable = cumProbTable
+    this.cumProbTable = acquirePooled(Uint32Array, numSymbols)
+    return probTable
+  }
+
+  // Builds the ransPrecision-entry lookup table from this.probTable. Returns
+  // false on bad input data.
+  ransBuildLookUpTable(numSymbols: number): boolean {
+    // Pooled buffers may be oversized; every LUT slot in the used range is
+    // written below (cumProb must land exactly on ransPrecision), so no
+    // clearing needed.
+    const lutTable = this.lutTable!
+    const probTable = this.probTable!
+    const cumProbTable = this.cumProbTable!
     let cumProb = 0
     let actProb = 0
     for (let i = 0; i < numSymbols; ++i) {
-      const prob = tokenProbs[i]
-      probTable[i] = prob
+      const prob = probTable[i]
       cumProbTable[i] = cumProb
       cumProb += prob
       if (cumProb > this.ransPrecision) {

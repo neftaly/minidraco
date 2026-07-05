@@ -1,7 +1,7 @@
-// Web Worker entry for MiniDRACOLoader's worker pool. Bundled self-contained
-// (no imports) by tsup, so it can be spawned as a module worker via
-// `new Worker(new URL('./worker.js', import.meta.url), { type: 'module' })`
-// from the library dist, or inlined into an app bundle by webpack/turbopack.
+// Web Worker entry for MiniDRACOLoader's worker pool. Built self-contained
+// (no emitted sibling chunk imports) so frameworks that deploy worker URLs as
+// static/media assets, including Next/Turbopack, do not strand the decoder
+// chunk and force MiniDRACOLoader onto its synchronous fallback path.
 import { decodeDracoMesh } from './index'
 
 interface DecodeTask {
@@ -25,6 +25,8 @@ interface AttributeResult {
   itemSize: number
 }
 
+type IndexArray = Uint16Array | Uint32Array
+
 const typedArrayMap: Record<string, new (length: number) => any> = {
   Float32Array,
   Int8Array,
@@ -43,6 +45,14 @@ const attributeTypeMap: Record<string, number> = {
   COLOR: 2,
   TEX_COORD: 3,
   GENERIC: 4,
+}
+
+const copyIndexArray = (faces: Int32Array, numFaces: number, numPoints: number): IndexArray => {
+  const indexCount = numFaces * 3
+  const IndexArray = numPoints <= 0xffff ? Uint16Array : Uint32Array
+  const indices = new IndexArray(indexCount)
+  indices.set(faces.subarray(0, indexCount))
+  return indices
 }
 
 // --- JIT warmup -------------------------------------------------------------
@@ -86,11 +96,10 @@ const decodeTask = (task: DecodeTask, transfer: ArrayBuffer[]) => {
   const numPoints = mesh.numPoints()
   const numFaces = mesh.numFaces()
 
-  const indices = new Uint32Array(numFaces * 3)
-  indices.set(mesh.faces_.subarray(0, numFaces * 3))
+  const indices = copyIndexArray(mesh.faces_, numFaces, numPoints)
 
   const attributes: AttributeResult[] = []
-  transfer.push(indices.buffer)
+  transfer.push(indices.buffer as ArrayBuffer)
 
   for (const attributeName in attributeIDs) {
     const OutputTypedArray = typedArrayMap[attributeTypes[attributeName]]

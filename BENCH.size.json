@@ -1,0 +1,109 @@
+{
+  "date": "2026-07-05",
+  "runtime": "bun 1.3.14",
+  "engine": "JavaScriptCore",
+  "cpu": "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+  "packageArtifacts": [
+    {
+      "file": "index.d.ts",
+      "rawBytes": 8398,
+      "gzipBytes": 2029,
+      "brotliBytes": 1810
+    },
+    {
+      "file": "index.js",
+      "rawBytes": 233522,
+      "gzipBytes": 40861,
+      "brotliBytes": 34026
+    },
+    {
+      "file": "three.d.ts",
+      "rawBytes": 7950,
+      "gzipBytes": 1958,
+      "brotliBytes": 1774
+    },
+    {
+      "file": "three.js",
+      "rawBytes": 12514,
+      "gzipBytes": 3810,
+      "brotliBytes": 3316
+    },
+    {
+      "file": "worker.d.ts",
+      "rawBytes": 13,
+      "gzipBytes": 33,
+      "brotliBytes": 17
+    },
+    {
+      "file": "worker.js",
+      "rawBytes": 237623,
+      "gzipBytes": 43123,
+      "brotliBytes": 35855
+    }
+  ],
+  "browserAssets": [
+    {
+      "entry": "index.js",
+      "file": "index.min.js",
+      "rawBytes": 105031,
+      "gzipBytes": 26825,
+      "brotliBytes": 23044
+    },
+    {
+      "entry": "three.js",
+      "file": "three.min.js",
+      "rawBytes": 6362,
+      "gzipBytes": 2585,
+      "brotliBytes": 2274
+    },
+    {
+      "entry": "worker.js",
+      "file": "worker.min.js",
+      "rawBytes": 107807,
+      "gzipBytes": 28651,
+      "brotliBytes": 24705
+    }
+  ],
+  "browserBundles": [
+    {
+      "entry": "minidraco",
+      "file": "minidraco graph.min.js",
+      "rawBytes": 105031,
+      "gzipBytes": 26825,
+      "brotliBytes": 23044,
+      "assets": ["index.js"]
+    },
+    {
+      "entry": "minidraco/three main",
+      "file": "minidraco/three main graph.min.js",
+      "rawBytes": 6362,
+      "gzipBytes": 2585,
+      "brotliBytes": 2274,
+      "assets": ["three.js"]
+    },
+    {
+      "entry": "minidraco worker graph",
+      "file": "minidraco worker graph.min.js",
+      "rawBytes": 107807,
+      "gzipBytes": 28651,
+      "brotliBytes": 24705,
+      "assets": ["worker.js"]
+    },
+    {
+      "entry": "minidraco/three main + worker graph",
+      "file": "minidraco/three main + worker graph",
+      "rawBytes": 114169,
+      "gzipBytes": 31236,
+      "brotliBytes": 26979,
+      "assets": ["three.js", "worker.js"]
+    },
+    {
+      "entry": "minidraco/three sync fallback graph",
+      "file": "minidraco/three sync fallback graph",
+      "rawBytes": 111393,
+      "gzipBytes": 29410,
+      "brotliBytes": 25318,
+      "assets": ["index.js", "three.js"]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 // Ported from draco.js src/compression/mesh/traverser/MaxPredictionDegreeTraverser.js (MIT)
 
+import { scratchInt32, scratchUint8Zeroed } from '../../../core/ScratchArena'
+
 import type { MeshAttributeCornerTable } from '../../../mesh/MeshAttributeCornerTable'
 import type { CornerTable } from '../MeshEdgebreakerDecoderImpl'
 import type { MeshAttributeIndicesEncodingObserver } from './MeshAttributeIndicesEncodingObserver'
@@ -53,8 +55,8 @@ class MaxPredictionDegreeTraverser {
   init(cornerTable: CornerTable | MeshAttributeCornerTable, observer: MeshAttributeIndicesEncodingObserver): void {
     this._cornerTable = cornerTable
     this._observer = observer
-    this._isFaceVisited = new Uint8Array(cornerTable.numFaces())
-    this._isVertexVisited = new Uint8Array(cornerTable.numVertices())
+    this._isFaceVisited = null
+    this._isVertexVisited = null
     this._numVisitedFaces = 0
     this._cornerToVertex = cornerTable.cornerToVertexArray()
     this._oppositeCorners = cornerTable.oppositeCornerArray()
@@ -75,7 +77,9 @@ class MaxPredictionDegreeTraverser {
   }
 
   onTraversalStart(): void {
-    this._predictionDegree = new Int32Array(this._cornerTable!.numVertices())
+    this._isFaceVisited = scratchUint8Zeroed(this._cornerTable!.numFaces())
+    this._isVertexVisited = scratchUint8Zeroed(this._cornerTable!.numVertices())
+    this._predictionDegree = scratchInt32(this._cornerTable!.numVertices()).fill(0)
   }
 
   onTraversalEnd(): void {}

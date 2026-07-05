@@ -9,6 +9,7 @@ import { writeFileSync } from 'node:fs'
 import { cpus } from 'node:os'
 import { resolve } from 'node:path'
 
+import { median } from './bench-core'
 import { writeBenchMd } from './benchmd'
 import {
   BUNDLE_GLBS,
@@ -33,11 +34,6 @@ interface BenchResult {
   points: number
   faces: number
   medianMs: Record<string, number>
-}
-
-const median = (values: number[]): number => {
-  const sorted = [...values].toSorted((a, b) => a - b)
-  return sorted[Math.floor(sorted.length / 2)]
 }
 
 const bench = async (
@@ -137,7 +133,7 @@ if (QUICK) {
     })),
   }
   writeFileSync(benchJsonPath, `${JSON.stringify(json, null, 2)}\n`)
-  const oxfmt = Bun.spawnSync(['bunx', 'oxfmt', benchJsonPath])
+  const oxfmt = Bun.spawnSync([process.execPath, 'x', 'oxfmt', benchJsonPath])
   if (oxfmt.exitCode !== 0) console.warn(`oxfmt failed on BENCH.json: ${oxfmt.stderr.toString().trim()}`)
   console.log(`\nWrote ${benchJsonPath}`)
 

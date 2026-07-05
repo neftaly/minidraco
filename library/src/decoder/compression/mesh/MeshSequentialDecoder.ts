@@ -1,5 +1,6 @@
 // Ported from draco.js src/compression/mesh/MeshSequentialDecoder.js (MIT)
 
+import { scratchUint32 } from '../../core/ScratchArena'
 import { decodeVarint } from '../../core/VarintDecoding'
 import { LinearSequencer } from '../attributes/LinearSequencer'
 import { SequentialAttributeDecodersController } from '../attributes/SequentialAttributeDecodersController'
@@ -85,7 +86,7 @@ class MeshSequentialDecoder extends MeshDecoder {
 
   _decodeAndDecompressIndices(numFaces: number): boolean {
     const numIndices = numFaces * 3
-    const indicesBuffer = new Uint32Array(numIndices)
+    const indicesBuffer = scratchUint32(numIndices)
     if (!decodeSymbols(numIndices, 1, this.buffer()!, indicesBuffer)) {
       return false
     }

@@ -1,5 +1,7 @@
 // Ported from draco.js src/compression/mesh/traverser/MeshTraversalSequencer.js (MIT)
 
+import { scratchInt32 } from '../../../core/ScratchArena'
+
 import type { PointAttribute } from '../../../attributes/PointAttribute'
 import type { Mesh } from '../../../mesh/Mesh'
 import type { MeshAttributeIndicesEncodingData } from '../MeshEdgebreakerDecoderImpl'
@@ -136,7 +138,8 @@ class MeshTraversalSequencer {
 
   _generateSequenceInternal(): boolean {
     this._numOutPoints = 0
-    this._outPointIds = new Int32Array(this._mesh.numPoints())
+    const numPoints = this._mesh.numPoints()
+    this._outPointIds = numPoints === 0 ? new Int32Array(0) : scratchInt32(numPoints)
 
     this._traverser!.onTraversalStart()
     const numFaces = this._traverser!.cornerTable()!.numFaces()

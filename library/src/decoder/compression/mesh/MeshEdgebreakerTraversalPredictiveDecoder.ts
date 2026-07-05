@@ -1,5 +1,6 @@
 // Ported from draco.js src/compression/mesh/MeshEdgebreakerTraversalPredictiveDecoder.js (MIT)
 
+import { scratchInt32 } from '../../core/ScratchArena'
 import { TOPOLOGY_C, TOPOLOGY_S, TOPOLOGY_L, TOPOLOGY_R, TOPOLOGY_E } from './MeshEdgebreakerShared'
 import { MeshEdgebreakerTraversalDecoder } from './MeshEdgebreakerTraversalDecoder'
 
@@ -16,7 +17,7 @@ class MeshEdgebreakerTraversalPredictiveDecoder extends MeshEdgebreakerTraversal
   _numVertices: number
   _lastSymbol: number
   _predictedSymbol: number
-  _vertexValences: number[]
+  _vertexValences: Int32Array
   _predictionDecoder: RAnsBitDecoder | null
 
   constructor() {
@@ -25,7 +26,7 @@ class MeshEdgebreakerTraversalPredictiveDecoder extends MeshEdgebreakerTraversal
     this._numVertices = 0
     this._lastSymbol = -1
     this._predictedSymbol = -1
-    this._vertexValences = []
+    this._vertexValences = new Int32Array(0)
     this._predictionDecoder = null // RAnsBitDecoder
   }
 
@@ -49,7 +50,7 @@ class MeshEdgebreakerTraversalPredictiveDecoder extends MeshEdgebreakerTraversal
     if (numSplitSymbols >= this._numVertices) {
       return false
     }
-    this._vertexValences = new Array<number>(this._numVertices).fill(0)
+    this._vertexValences = scratchInt32(this._numVertices).fill(0)
     this._predictionDecoder = this._createRAnsBitDecoder()
     if (this._predictionDecoder === null) {
       return false
@@ -74,38 +75,40 @@ class MeshEdgebreakerTraversalPredictiveDecoder extends MeshEdgebreakerTraversal
   }
 
   override newActiveCornerReached(corner: number): void {
-    const ct = this._cornerTable!
-    const next = ct.next(corner)
-    const prev = ct.previous(corner)
+    const cornerToVertex = this._cornerTable!._cornerToVertex!
+    const valences = this._vertexValences
+    const next = corner % 3 === 2 ? corner - 2 : corner + 1
+    const prev = corner % 3 === 0 ? corner + 2 : corner - 1
+    const vertNext = cornerToVertex[next]
+    const vertPrev = cornerToVertex[prev]
 
     switch (this._lastSymbol) {
       case TOPOLOGY_C:
       case TOPOLOGY_S:
-        this._vertexValences[ct.vertex(next)] += 1
-        this._vertexValences[ct.vertex(prev)] += 1
+        valences[vertNext] += 1
+        valences[vertPrev] += 1
         break
       case TOPOLOGY_R:
-        this._vertexValences[ct.vertex(corner)] += 1
-        this._vertexValences[ct.vertex(next)] += 1
-        this._vertexValences[ct.vertex(prev)] += 2
+        valences[cornerToVertex[corner]] += 1
+        valences[vertNext] += 1
+        valences[vertPrev] += 2
         break
       case TOPOLOGY_L:
-        this._vertexValences[ct.vertex(corner)] += 1
-        this._vertexValences[ct.vertex(next)] += 2
-        this._vertexValences[ct.vertex(prev)] += 1
+        valences[cornerToVertex[corner]] += 1
+        valences[vertNext] += 2
+        valences[vertPrev] += 1
         break
       case TOPOLOGY_E:
-        this._vertexValences[ct.vertex(corner)] += 2
-        this._vertexValences[ct.vertex(next)] += 2
-        this._vertexValences[ct.vertex(prev)] += 2
+        valences[cornerToVertex[corner]] += 2
+        valences[vertNext] += 2
+        valences[vertPrev] += 2
         break
       default:
         break
     }
 
     if (this._lastSymbol === TOPOLOGY_C || this._lastSymbol === TOPOLOGY_R) {
-      const pivot = ct.vertex(ct.next(corner))
-      if (this._vertexValences[pivot] < 6) {
+      if (valences[vertNext] < 6) {
         this._predictedSymbol = TOPOLOGY_R
       } else {
         this._predictedSymbol = TOPOLOGY_C

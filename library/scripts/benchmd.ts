@@ -1,6 +1,8 @@
-// Renders BENCH.md from the machine-readable results: BENCH.json (bun) and
+// Renders BENCH.md from the machine-readable results: BENCH.json (bun),
 // BENCH.browser.json (browser single-threaded raw decode + GLTFLoader wall
-// clock). Run directly to re-render from the current JSON files:
+// clock), BENCH.alloc.json (allocation/GC proxy), and BENCH.size.json
+// (package/deployed size). Run directly to re-render from the current JSON
+// files:
 //
 //   bun library/scripts/benchmd.ts
 //
@@ -41,6 +43,47 @@ interface BrowserResults {
   multiThreaded?: BrowserSection
 }
 
+interface AllocationRow {
+  file: string
+  mode: string
+  primitives: number
+  medianMs: number
+  minMs: number
+  heapGrowthBytes: number
+  retainedHeapBytes: number
+  arrayBufferGrowthBytes: number
+  retainedArrayBufferBytes: number
+  gcMedianMs: number
+}
+
+interface AllocationResults {
+  date: string
+  runtime: string
+  engine: string
+  cpu: string
+  warmupRuns: number
+  timedRuns: number
+  results: AllocationRow[]
+}
+
+interface SizeRow {
+  file: string
+  rawBytes: number
+  gzipBytes: number
+  brotliBytes: number
+}
+
+interface BrowserBundleRow extends SizeRow {
+  entry: string
+}
+
+interface SizeResults {
+  date: string
+  runtime: string
+  packageArtifacts: SizeRow[]
+  browserBundles: BrowserBundleRow[]
+}
+
 const repoRoot = resolve(import.meta.dir, '../..')
 
 // How minidraco compares against another decoder's time, as a human-readable
@@ -74,7 +117,7 @@ const resultsTable = (results: ResultRow[]): string[] => {
     const wasm = r.medianMs['draco3d (wasm)']
     return [
       `\`${r.file}\``,
-      ...(withCounts ? [String(r.primitives), r.faces!.toLocaleString('en-US')] : []),
+      ...(withCounts ? [String(r.primitives), (r.faces ?? 0).toLocaleString('en-US')] : []),
       `${mini.toFixed(2)} ms`,
       `${js.toFixed(2)} ms`,
       `${wasm.toFixed(2)} ms`,
@@ -86,6 +129,52 @@ const resultsTable = (results: ResultRow[]): string[] => {
   return [`| ${header.join(' | ')} |`, `| ${align.join(' | ')} |`, ...rows.map(cells => `| ${cells.join(' | ')} |`)]
 }
 
+const bytes = (value: number): string => {
+  const sign = value < 0 ? '-' : ''
+  let n = Math.abs(value)
+  const units = ['B', 'KB', 'MB', 'GB']
+  let unit = 0
+  while (n >= 1024 && unit < units.length - 1) {
+    n /= 1024
+    unit++
+  }
+  return `${sign}${unit === 0 ? n.toFixed(0) : n.toFixed(2)} ${units[unit]}`
+}
+
+const sizeTable = (results: SizeRow[]): string[] => {
+  const header = ['file', 'raw', 'gzip', 'brotli']
+  const align = ['---', '---:', '---:', '---:']
+  const rows = results.map(r => [`\`${r.file}\``, bytes(r.rawBytes), bytes(r.gzipBytes), bytes(r.brotliBytes)])
+  return [`| ${header.join(' | ')} |`, `| ${align.join(' | ')} |`, ...rows.map(cells => `| ${cells.join(' | ')} |`)]
+}
+
+const allocationTable = (results: AllocationRow[]): string[] => {
+  const header = [
+    'file',
+    'mode',
+    'prims',
+    'median',
+    'heap+',
+    'heap retained',
+    'arraybuf+',
+    'arraybuf retained',
+    'gc median',
+  ]
+  const align = ['---', '---', '---:', '---:', '---:', '---:', '---:', '---:', '---:']
+  const rows = results.map(r => [
+    `\`${r.file}\``,
+    r.mode,
+    String(r.primitives),
+    `${r.medianMs.toFixed(2)} ms`,
+    bytes(r.heapGrowthBytes),
+    bytes(r.retainedHeapBytes),
+    bytes(r.arrayBufferGrowthBytes),
+    bytes(r.retainedArrayBufferBytes),
+    `${r.gcMedianMs.toFixed(2)} ms`,
+  ])
+  return [`| ${header.join(' | ')} |`, `| ${align.join(' | ')} |`, ...rows.map(cells => `| ${cells.join(' | ')} |`)]
+}
+
 // "Chrome/142.0.0.0 on Macintosh" out of a full user-agent string
 const shortBrowser = (userAgent: string): string => {
   const browser = userAgent.match(/(Chrome|Firefox|Safari)\/[\d.]+/)?.[0]
@@ -93,11 +182,16 @@ const shortBrowser = (userAgent: string): string => {
   return browser ? `${browser}${platform ? ` on ${platform}` : ''}` : userAgent
 }
 
-export const renderBenchMd = (bun: BunResults, browser: BrowserResults | null): string => {
+export const renderBenchMd = (
+  bun: BunResults,
+  browser: BrowserResults | null,
+  allocation: AllocationResults | null,
+  size: SizeResults | null,
+): string => {
   const lines = [
     '# Benchmark results',
     '',
-    '<!-- Generated from BENCH.json + BENCH.browser.json by library/scripts/benchmd.ts — do not edit by hand. -->',
+    '<!-- Generated from BENCH*.json by library/scripts/benchmd.ts — do not edit by hand. -->',
     '',
     'Median decode time per file (every Draco primitive decoded sequentially per run). The corpus',
     'is the production bundle GLBs from `example/public/models` plus the sample models shipped in',
@@ -154,6 +248,63 @@ export const renderBenchMd = (bun: BunResults, browser: BrowserResults | null): 
     lines.push('_No saved browser results — run the loader benchmark on the `/bench` page locally and save it._', '')
   }
 
+  lines.push('## Allocation / GC proxy', '')
+  if (allocation) {
+    lines.push(
+      'JavaScript runtimes do not expose total allocation counters, so this records heap and',
+      'ArrayBuffer growth before forced GC, retained deltas after forced GC, and forced-GC',
+      `pause time. Median of ${allocation.timedRuns} runs after ${allocation.warmupRuns} warmups on the production bundle GLBs.`,
+      '',
+      `- Date: ${allocation.date}`,
+      `- Runtime: ${allocation.runtime} (${allocation.engine})`,
+      `- CPU: ${allocation.cpu}`,
+      '',
+      ...allocationTable(allocation.results),
+      '',
+    )
+  } else {
+    lines.push('_No saved allocation results — run `bun run bench:alloc`._', '')
+  }
+
+  lines.push('## Deployed size', '')
+  if (size) {
+    const threeMain = size.browserBundles.find(row => row.entry === 'minidraco/three main')
+    const worker = size.browserBundles.find(row => row.entry === 'minidraco worker')
+    const browserBundles =
+      threeMain && worker
+        ? [
+            ...size.browserBundles,
+            {
+              entry: 'minidraco/three main + worker',
+              file: 'minidraco/three main + worker',
+              rawBytes: threeMain.rawBytes + worker.rawBytes,
+              gzipBytes: threeMain.gzipBytes + worker.gzipBytes,
+              brotliBytes: threeMain.brotliBytes + worker.brotliBytes,
+            },
+          ]
+        : size.browserBundles
+
+    lines.push(
+      'Minified browser bundles are built from `library/dist` with `three` externalized for',
+      '`minidraco/three`. The worker is a separate module-worker asset referenced by',
+      '`new URL("./worker.js", import.meta.url)`.',
+      '',
+      `- Date: ${size.date}`,
+      `- Runtime: ${size.runtime}`,
+      '',
+      'Package artifacts:',
+      '',
+      ...sizeTable(size.packageArtifacts),
+      '',
+      'Browser-deployed bundles:',
+      '',
+      ...sizeTable(browserBundles),
+      '',
+    )
+  } else {
+    lines.push('_No saved size results — run `bun run bench:size` after a library build._', '')
+  }
+
   lines.push(
     'Medians of independent runs carry roughly ±10% JIT/thermal noise (more for the loader wall',
     'clock) — treat this as the cross-decoder picture, not a micro-optimization ranking.',
@@ -167,13 +318,19 @@ export const writeBenchMd = (): void => {
   const bun = JSON.parse(readFileSync(resolve(repoRoot, 'BENCH.json'), 'utf8')) as BunResults
   const browserPath = resolve(repoRoot, 'BENCH.browser.json')
   const browser = existsSync(browserPath) ? (JSON.parse(readFileSync(browserPath, 'utf8')) as BrowserResults) : null
+  const allocationPath = resolve(repoRoot, 'BENCH.alloc.json')
+  const allocation = existsSync(allocationPath)
+    ? (JSON.parse(readFileSync(allocationPath, 'utf8')) as AllocationResults)
+    : null
+  const sizePath = resolve(repoRoot, 'BENCH.size.json')
+  const size = existsSync(sizePath) ? (JSON.parse(readFileSync(sizePath, 'utf8')) as SizeResults) : null
 
   const benchMdPath = resolve(repoRoot, 'BENCH.md')
-  writeFileSync(benchMdPath, renderBenchMd(bun, browser))
+  writeFileSync(benchMdPath, renderBenchMd(bun, browser, allocation, size))
 
   // oxfmt owns the final table padding — emoji column widths are hard to
   // reproduce by hand and the file must pass `oxfmt --check`
-  const oxfmt = Bun.spawnSync(['bunx', 'oxfmt', benchMdPath])
+  const oxfmt = Bun.spawnSync([process.execPath, 'x', 'oxfmt', benchMdPath])
   if (oxfmt.exitCode !== 0) console.warn(`oxfmt failed on BENCH.md: ${oxfmt.stderr.toString().trim()}`)
   console.log(`Wrote ${benchMdPath}`)
 }

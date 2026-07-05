@@ -2,7 +2,7 @@
 
 import { DecoderBuffer } from '../../core/DecoderBuffer'
 import { RAnsBitDecoder } from '../bit_coders/RAnsBitDecoder'
-import { TOPOLOGY_C } from './MeshEdgebreakerShared'
+import { TOPOLOGY_C, TOPOLOGY_INVALID } from './MeshEdgebreakerShared'
 
 import type { MeshEdgebreakerDecoderImpl } from './MeshEdgebreakerDecoderImpl'
 
@@ -62,12 +62,14 @@ class MeshEdgebreakerTraversalDecoder {
   }
 
   decodeSymbol(): number {
-    let symbol = this._symbolBuffer.decodeLeastSignificantBits32(1)!
+    let symbol = this._symbolBuffer.decodeLeastSignificantBits32(1)
+    if (symbol === undefined) return TOPOLOGY_INVALID
     if (symbol === TOPOLOGY_C) {
       return symbol
     }
     // Non-C symbols carry two additional bits.
-    const symbolSuffix = this._symbolBuffer.decodeLeastSignificantBits32(2)!
+    const symbolSuffix = this._symbolBuffer.decodeLeastSignificantBits32(2)
+    if (symbolSuffix === undefined) return TOPOLOGY_INVALID
     symbol |= symbolSuffix << 1
     return symbol
   }

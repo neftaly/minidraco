@@ -1,6 +1,6 @@
 // Ported from draco.js src/mesh/MeshAttributeCornerTable.js (MIT)
 
-import { scratchInt32 } from '../core/ScratchArena'
+import { scratchInt32, scratchUint8Zeroed } from '../core/ScratchArena'
 
 import type { CornerTable } from '../compression/mesh/MeshEdgebreakerDecoderImpl'
 
@@ -13,7 +13,7 @@ class MeshAttributeCornerTable {
   no_interior_seams_: boolean
   corner_to_vertex_map_: Int32Array | number[]
   vertex_to_left_most_corner_map_: Int32Array | number[]
-  vertex_to_attribute_entry_id_map_: Int32Array | number[]
+  _numVertices: number
   corner_table_: CornerTable | null
   // Lazily built; see oppositeCornerArray.
   _effectiveOpposite: Int32Array | null
@@ -27,7 +27,7 @@ class MeshAttributeCornerTable {
     this.no_interior_seams_ = true
     this.corner_to_vertex_map_ = []
     this.vertex_to_left_most_corner_map_ = []
-    this.vertex_to_attribute_entry_id_map_ = []
+    this._numVertices = 0
     this.corner_table_ = null
     this._effectiveOpposite = null
     this._seamCorners = []
@@ -39,10 +39,10 @@ class MeshAttributeCornerTable {
     }
     // Typed arrays keep the per-corner hot accessors monomorphic. Uint8Array
     // defaults to 0 (== false); corner_to_vertex_map_ uses a signed -1 sentinel.
-    this.is_edge_on_seam_ = new Uint8Array(table.numCorners())
-    this.is_vertex_on_seam_ = new Uint8Array(table.numVertices())
-    this.corner_to_vertex_map_ = new Int32Array(table.numCorners()).fill(kInvalidVertexIndex)
-    this.vertex_to_attribute_entry_id_map_ = []
+    this.is_edge_on_seam_ = scratchUint8Zeroed(table.numCorners())
+    this.is_vertex_on_seam_ = scratchUint8Zeroed(table.numVertices())
+    this.corner_to_vertex_map_ = scratchInt32(table.numCorners()).fill(kInvalidVertexIndex)
+    this._numVertices = 0
     this.vertex_to_left_most_corner_map_ = []
     // Lazily built; see oppositeCornerArray.
     this._effectiveOpposite = null
@@ -87,7 +87,7 @@ class MeshAttributeCornerTable {
     const numCorners = ct.numCorners()
     const numBaseVertices = ct.numVertices()
     // Preallocate leftMostMap by new-vertex id (new-vertex count <= numCorners).
-    const leftMostMap = new Int32Array(numCorners)
+    const leftMostMap = scratchInt32(numCorners)
     const cornerToVertex = this.corner_to_vertex_map_
     const isVertexOnSeam = this.is_vertex_on_seam_
     const isEdgeOnSeam = this.is_edge_on_seam_
@@ -157,8 +157,7 @@ class MeshAttributeCornerTable {
       }
     }
 
-    // vertex_to_attribute_entry_id_map_ is only read for its length (numVertices()).
-    this.vertex_to_attribute_entry_id_map_ = new Int32Array(numNewVertices)
+    this._numVertices = numNewVertices
     // subarray, not copy: exact-length view so accessors see the right length.
     this.vertex_to_left_most_corner_map_ = leftMostMap.subarray(0, numNewVertices)
 
@@ -193,7 +192,7 @@ class MeshAttributeCornerTable {
   }
 
   numVertices(): number {
-    return this.vertex_to_attribute_entry_id_map_.length
+    return this._numVertices
   }
 
   numFaces(): number {
@@ -286,8 +285,8 @@ class MeshAttributeCornerTable {
 
   adoptVertexRecompute(other: MeshAttributeCornerTable): void {
     this.corner_to_vertex_map_ = other.corner_to_vertex_map_
-    this.vertex_to_attribute_entry_id_map_ = other.vertex_to_attribute_entry_id_map_
     this.vertex_to_left_most_corner_map_ = other.vertex_to_left_most_corner_map_
+    this._numVertices = other._numVertices
     this.no_interior_seams_ = other.no_interior_seams_
     this._effectiveOpposite = other._effectiveOpposite
     this._seamCorners = other._seamCorners

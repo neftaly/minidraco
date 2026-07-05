@@ -17,11 +17,6 @@ import {
   SRGBColorSpace,
 } from 'three'
 
-// Import shared decoder symbols via the public entry (not deep decoder
-// paths): it keeps the dts build free of hashed shared-type chunks — three.d.ts
-// simply imports from index.d.ts.
-import { decodeDracoMesh, GeometryAttributeType } from '../index'
-
 import type { LoadingManager } from 'three'
 
 import type { Mesh, PointAttribute } from '../index'
@@ -42,8 +37,10 @@ interface RawAttribute {
   itemSize: number
 }
 
+type IndexArray = Uint16Array | Uint32Array
+
 interface RawGeometry {
-  indices: Uint32Array
+  indices: IndexArray
   attributes: RawAttribute[]
 }
 
@@ -72,11 +69,13 @@ type TypedArrayConstructor =
 const _taskCache = new WeakMap<ArrayBuffer, { key: string; promise: Promise<BufferGeometry> }>()
 
 const _attributeTypeMap: Record<string, number> = {
-  POSITION: GeometryAttributeType.POSITION,
-  NORMAL: GeometryAttributeType.NORMAL,
-  COLOR: GeometryAttributeType.COLOR,
-  TEX_COORD: GeometryAttributeType.TEX_COORD,
-  GENERIC: GeometryAttributeType.GENERIC,
+  // Matches GeometryAttributeType in the decoder; inlined so the Three loader
+  // does not statically pull the decoder into the main bundle.
+  POSITION: 0,
+  NORMAL: 1,
+  COLOR: 2,
+  TEX_COORD: 3,
+  GENERIC: 4,
 }
 
 const _typedArrayMap: Record<string, TypedArrayConstructor> = {
@@ -89,16 +88,27 @@ const _typedArrayMap: Record<string, TypedArrayConstructor> = {
   Uint32Array,
 }
 
+type DecoderModule = typeof import('../index')
+
+let _decoderModule: Promise<DecoderModule> | null = null
+
+const _loadDecoder = (): Promise<DecoderModule> => (_decoderModule ??= import('../index'))
+
+const _copyIndexArray = (faces: Int32Array, numFaces: number, numPoints: number): IndexArray => {
+  const indexCount = numFaces * 3
+  const IndexArray = numPoints <= 0xffff ? Uint16Array : Uint32Array
+  const index = new IndexArray(indexCount)
+  index.set(faces.subarray(0, indexCount))
+  return index
+}
+
 class MiniDRACOLoader extends Loader<BufferGeometry> {
   defaultAttributeIDs: AttributeIDs
   defaultAttributeTypes: AttributeTypes
   workerLimit: number
-  // Opt-in (0 = disabled): buffers at or below this size decode synchronously
-  // on the main thread instead of paying the ~0.5 ms worker message roundtrip.
-  // Worth enabling (e.g. 4096) when the main thread is otherwise idle during
-  // loads — in a full GLTFLoader parse the main thread is already busy
-  // building geometries, and measurements show the pool wins there even for
-  // tiny primitives.
+  // Compatibility with the previous opt-in tiny-buffer path. Default 0 keeps
+  // worker-first behavior for normal Draco payloads; positive values decode
+  // small buffers on the main thread after yielding one microtask.
   syncByteThreshold: number
 
   _workers: WorkerEntry[]
@@ -265,7 +275,9 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
 
   async _runTask(buffer: ArrayBuffer, taskConfig: TaskConfig): Promise<BufferGeometry> {
     if (this._workersAvailable()) {
-      if (buffer.byteLength > this.syncByteThreshold) {
+      if (buffer.byteLength <= this.syncByteThreshold) {
+        await Promise.resolve()
+      } else {
         try {
           const raw = await this._decodeInWorker(buffer, taskConfig)
           return this._buildGeometryFromRaw(raw, taskConfig)
@@ -275,11 +287,6 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
           if ((error as { isDecodeError?: boolean })?.isDecodeError) throw error
           this._workersBroken = true
         }
-      } else {
-        // Tiny buffer: decode on the main thread, but yield one microtask
-        // first so a caller looping over many primitives finishes posting the
-        // large ones to the workers before we start doing sync work.
-        await Promise.resolve()
       }
     }
     return this._decodeBuffer(buffer, taskConfig)
@@ -447,10 +454,14 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
     return geometry
   }
 
-  // Synchronous main-thread decode (worker fallback and DracoJs-style reuse).
-  _decodeBuffer(buffer: ArrayBuffer, taskConfig: TaskConfig): BufferGeometry {
-    const mesh = decodeDracoMesh(new Uint8Array(buffer))
-    return this._buildGeometry(mesh, taskConfig)
+  // Main-thread decode path (worker fallback, setWorkerLimit(0), and
+  // DracoJs-style reuse). The decoder module is loaded lazily so importing
+  // `minidraco/three` does not duplicate the worker's decoder payload.
+  _decodeBuffer(buffer: ArrayBuffer, taskConfig: TaskConfig): BufferGeometry | Promise<BufferGeometry> {
+    return _loadDecoder().then(({ decodeDracoMesh }) => {
+      const mesh = decodeDracoMesh(new Uint8Array(buffer))
+      return this._buildGeometry(mesh, taskConfig)
+    })
   }
 
   _buildGeometry(dracoGeometry: Mesh, taskConfig: TaskConfig): BufferGeometry {
@@ -491,8 +502,7 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
     }
 
     const numFaces = dracoGeometry.numFaces()
-    const index = new Uint32Array(numFaces * 3)
-    index.set(dracoGeometry.faces_.subarray(0, numFaces * 3))
+    const index = _copyIndexArray(dracoGeometry.faces_, numFaces, numPoints)
 
     geometry.setIndex(new BufferAttribute(index, 1))
 

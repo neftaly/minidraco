@@ -1,5 +1,6 @@
 // Ported from draco.js src/compression/mesh/MeshEdgebreakerTraversalValenceDecoder.js (MIT)
 
+import { scratchInt32, scratchUint32 } from '../../core/ScratchArena'
 import { decodeVarint } from '../../core/VarintDecoding'
 import { decodeSymbols } from '../entropy/SymbolDecoding'
 import {
@@ -15,6 +16,8 @@ import { MeshEdgebreakerTraversalDecoder } from './MeshEdgebreakerTraversalDecod
 
 import type { DecoderBuffer } from '../../core/DecoderBuffer'
 import type { CornerTable, MeshEdgebreakerDecoderImpl } from './MeshEdgebreakerDecoderImpl'
+
+const EMPTY_UINT32 = new Uint32Array(0)
 
 // Decoder for traversal encoded with MeshEdgebreakerTraversalValenceEncoder.
 // The decoder maintains valences of the decoded portion of the traversed mesh
@@ -70,7 +73,7 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
     }
     // Int32Array: read/written for every decoded symbol; typed access keeps
     // the newActiveCornerReached hot path monomorphic
-    this._vertexValences = new Int32Array(this._numVertices)
+    this._vertexValences = scratchInt32(this._numVertices).fill(0)
 
     const numUniqueValences = this._maxValence - this._minValence + 1
 
@@ -86,14 +89,14 @@ class MeshEdgebreakerTraversalValenceDecoder extends MeshEdgebreakerTraversalDec
         return false
       }
       if (numSymbols > 0) {
-        this._contextSymbols[i] = new Uint32Array(numSymbols)
+        this._contextSymbols[i] = scratchUint32(numSymbols)
         if (!decodeSymbols(numSymbols, 1, outBuffer, this._contextSymbols[i])) {
           return false
         }
         // All symbols are going to be processed from the back.
         this._contextCounters[i] = numSymbols
       } else {
-        this._contextSymbols[i] = new Uint32Array(0)
+        this._contextSymbols[i] = EMPTY_UINT32
         this._contextCounters[i] = 0
       }
     }
