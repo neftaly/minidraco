@@ -111,14 +111,14 @@ pause time. Median of 15 runs after 3 warmups on the production bundle GLBs.
 - Runtime: bun 1.3.14 (JavaScriptCore)
 - CPU: 11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz
 
-| file                | mode           | prims |   median |    heap+ | heap retained | arraybuf+ | arraybuf retained | gc median |
-| ------------------- | -------------- | ----: | -------: | -------: | ------------: | --------: | ----------------: | --------: |
-| `canine-bundle.glb` | decode         |     1 |  1.35 ms |      0 B |           0 B |  27.63 KB |               0 B |   1.52 ms |
-| `canine-bundle.glb` | decode+extract |     1 |  0.86 ms |      0 B |           0 B |  33.97 KB |               0 B |   1.59 ms |
-| `player-bundle.glb` | decode         |     7 |  2.44 ms |      0 B |           0 B | 131.55 KB |               0 B |   2.26 ms |
-| `player-bundle.glb` | decode+extract |     7 |  2.17 ms |      0 B |           0 B | 162.13 KB |               0 B |   1.92 ms |
-| `static-bundle.glb` | decode         |   488 | 69.87 ms | 11.96 KB |      11.96 KB |   6.35 MB |               0 B |   3.13 ms |
-| `static-bundle.glb` | decode+extract |   488 | 64.78 ms |      0 B |           0 B |   8.93 MB |               0 B |   3.30 ms |
+| file                | mode           | prims |   median |   heap+ | heap retained | arraybuf+ | arraybuf retained | gc median |
+| ------------------- | -------------- | ----: | -------: | ------: | ------------: | --------: | ----------------: | --------: |
+| `canine-bundle.glb` | decode         |     1 |  1.01 ms |     0 B |           0 B |  27.63 KB |               0 B |   1.48 ms |
+| `canine-bundle.glb` | decode+extract |     1 |  0.91 ms |     0 B |           0 B |  33.97 KB |               0 B |   1.74 ms |
+| `player-bundle.glb` | decode         |     7 |  2.53 ms |     0 B |           0 B | 131.55 KB |               0 B |   2.48 ms |
+| `player-bundle.glb` | decode+extract |     7 |  2.18 ms |     0 B |           0 B | 162.13 KB |               0 B |   1.81 ms |
+| `static-bundle.glb` | decode         |   488 | 67.87 ms | 5.37 KB |       5.37 KB |   6.35 MB |               0 B |   3.04 ms |
+| `static-bundle.glb` | decode+extract |   488 | 64.26 ms |     0 B |           0 B |   8.93 MB |               0 B |   3.18 ms |
 
 ## Deployed size
 
@@ -134,21 +134,21 @@ Package artifacts:
 | file          |       raw |     gzip |   brotli |
 | ------------- | --------: | -------: | -------: |
 | `index.d.ts`  |   8.20 KB |  1.98 KB |  1.77 KB |
-| `index.js`    | 228.05 KB | 39.90 KB | 33.23 KB |
+| `index.js`    | 228.28 KB | 39.98 KB | 33.30 KB |
 | `three.d.ts`  |   7.76 KB |  1.91 KB |  1.73 KB |
 | `three.js`    |  12.22 KB |  3.72 KB |  3.24 KB |
 | `worker.d.ts` |      13 B |     33 B |     17 B |
-| `worker.js`   | 232.05 KB | 42.11 KB | 35.01 KB |
+| `worker.js`   | 232.28 KB | 42.19 KB | 35.06 KB |
 
 Browser-deployed bundles:
 
 | file                                  |       raw |     gzip |   brotli |
 | ------------------------------------- | --------: | -------: | -------: |
-| `minidraco graph.min.js`              | 102.57 KB | 26.20 KB | 22.50 KB |
+| `minidraco graph.min.js`              | 102.56 KB | 26.20 KB | 22.52 KB |
 | `minidraco/three main graph.min.js`   |   6.21 KB |  2.52 KB |  2.22 KB |
-| `minidraco worker graph.min.js`       | 105.28 KB | 27.98 KB | 24.13 KB |
-| `minidraco/three main + worker graph` | 111.49 KB | 30.50 KB | 26.35 KB |
-| `minidraco/three sync fallback graph` | 108.78 KB | 28.72 KB | 24.72 KB |
+| `minidraco worker graph.min.js`       | 105.27 KB | 27.98 KB | 24.08 KB |
+| `minidraco/three main + worker graph` | 111.49 KB | 30.51 KB | 26.30 KB |
+| `minidraco/three sync fallback graph` | 108.78 KB | 28.73 KB | 24.74 KB |
 
 Medians of independent runs carry roughly ±10% JIT/thermal noise (more for the loader wall
 clock) — treat this as the cross-decoder picture, not a micro-optimization ranking.

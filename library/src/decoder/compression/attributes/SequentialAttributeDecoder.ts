@@ -49,6 +49,12 @@ class SequentialAttributeDecoder {
   }
 
   getPortableAttribute(): PointAttribute | null {
+    return this._portableAttribute
+  }
+
+  // For predictor parent lookups and skip-transform output copies that need the
+  // same point->value map as the final attribute.
+  getMappedPortableAttribute(): PointAttribute | null {
     // Copy point->value index mapping from the final attribute to the portable
     // one. Both maps are Uint32Array, so copy in one shot instead of per-entry
     // mappedIndex()/setPointMapEntry() calls.

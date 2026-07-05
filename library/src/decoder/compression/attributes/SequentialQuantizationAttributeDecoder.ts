@@ -43,7 +43,7 @@ class SequentialQuantizationAttributeDecoder extends SequentialIntegerAttributeD
   }
 
   _decodeQuantizedDataInfo(): boolean {
-    let att = this.getPortableAttribute()
+    let att = this.portableAttribute
     if (att === null) {
       // Null only in backward-compatibility mode; fall back to the raw attribute.
       att = this.attribute
@@ -52,7 +52,7 @@ class SequentialQuantizationAttributeDecoder extends SequentialIntegerAttributeD
   }
 
   _dequantizeValues(_numValues: number): boolean {
-    return this._quantizationTransform.inverseTransformAttribute(this.getPortableAttribute()!, this.attribute!)
+    return this._quantizationTransform.inverseTransformAttribute(this.portableAttribute!, this.attribute!)
   }
 }
 

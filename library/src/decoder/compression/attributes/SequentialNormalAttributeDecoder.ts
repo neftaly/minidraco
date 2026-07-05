@@ -41,7 +41,7 @@ class SequentialNormalAttributeDecoder extends SequentialIntegerAttributeDecoder
   }
 
   override decodeDataNeededByPortableTransform(pointIds: Int32Array, buffer: DecoderBuffer): boolean {
-    if (!this._octahedralTransform.decodeParameters(this.getPortableAttribute()!, buffer)) {
+    if (!this._octahedralTransform.decodeParameters(this.portableAttribute!, buffer)) {
       return false
     }
 
@@ -49,7 +49,7 @@ class SequentialNormalAttributeDecoder extends SequentialIntegerAttributeDecoder
   }
 
   override _storeValues(numPoints: number): boolean {
-    return this._octahedralTransform.inverseTransformAttribute(this.getPortableAttribute()!, this.attribute!)
+    return this._octahedralTransform.inverseTransformAttribute(this.portableAttribute!, this.attribute!)
   }
 
   override createIntPredictionScheme(method: number, transformType: number): PredictionSchemeDecoderInterface | null {

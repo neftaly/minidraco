@@ -78,7 +78,7 @@ class SequentialAttributeDecodersController extends AttributesDecoder {
     if (locId < 0) {
       return null
     }
-    return this._sequentialDecoders[locId]!.getPortableAttribute()
+    return this._sequentialDecoders[locId]!.getMappedPortableAttribute()
   }
 
   override decodePortableAttributes(buffer: DecoderBuffer): boolean {
@@ -104,16 +104,17 @@ class SequentialAttributeDecodersController extends AttributesDecoder {
   override transformAttributesToOriginalFormat(): boolean {
     const numAttributes = this.getNumAttributes()
     for (let i = 0; i < numAttributes; i++) {
-      if (this.getDecoder()!.options()) {
-        const attribute = this._sequentialDecoders[i]!.attribute
-        const portableAttribute = this._sequentialDecoders[i]!.getPortableAttribute()
-        if (
-          portableAttribute &&
-          this.getDecoder()!.options()!.getAttributeBool(attribute!.attributeType, 'skip_attribute_transform', false)
-        ) {
-          // Skip the transform: use the portable attribute as the output.
-          this._sequentialDecoders[i]!.attribute!.copyFrom(portableAttribute)
-          continue
+      const options = this.getDecoder()!.options()
+      if (options) {
+        const decoder = this._sequentialDecoders[i]!
+        const attribute = decoder.attribute
+        if (options.getAttributeBool(attribute!.attributeType, 'skip_attribute_transform', false)) {
+          const portableAttribute = decoder.getMappedPortableAttribute()
+          if (portableAttribute) {
+            // Skip the transform: use the portable attribute as the output.
+            decoder.attribute!.copyFrom(portableAttribute)
+            continue
+          }
         }
       }
       if (!this._sequentialDecoders[i]!.transformAttributeToOriginalFormat(this._pointIds)) {

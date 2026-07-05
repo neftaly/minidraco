@@ -12,9 +12,9 @@
     },
     {
       "file": "index.js",
-      "rawBytes": 233522,
-      "gzipBytes": 40861,
-      "brotliBytes": 34026
+      "rawBytes": 233755,
+      "gzipBytes": 40937,
+      "brotliBytes": 34099
     },
     {
       "file": "three.d.ts",
@@ -36,18 +36,18 @@
     },
     {
       "file": "worker.js",
-      "rawBytes": 237623,
-      "gzipBytes": 43123,
-      "brotliBytes": 35855
+      "rawBytes": 237856,
+      "gzipBytes": 43198,
+      "brotliBytes": 35897
     }
   ],
   "browserAssets": [
     {
       "entry": "index.js",
       "file": "index.min.js",
-      "rawBytes": 105031,
-      "gzipBytes": 26825,
-      "brotliBytes": 23044
+      "rawBytes": 105025,
+      "gzipBytes": 26832,
+      "brotliBytes": 23064
     },
     {
       "entry": "three.js",
@@ -59,18 +59,18 @@
     {
       "entry": "worker.js",
       "file": "worker.min.js",
-      "rawBytes": 107807,
-      "gzipBytes": 28651,
-      "brotliBytes": 24705
+      "rawBytes": 107801,
+      "gzipBytes": 28656,
+      "brotliBytes": 24659
     }
   ],
   "browserBundles": [
     {
       "entry": "minidraco",
       "file": "minidraco graph.min.js",
-      "rawBytes": 105031,
-      "gzipBytes": 26825,
-      "brotliBytes": 23044,
+      "rawBytes": 105025,
+      "gzipBytes": 26832,
+      "brotliBytes": 23064,
       "assets": ["index.js"]
     },
     {
@@ -84,25 +84,25 @@
     {
       "entry": "minidraco worker graph",
       "file": "minidraco worker graph.min.js",
-      "rawBytes": 107807,
-      "gzipBytes": 28651,
-      "brotliBytes": 24705,
+      "rawBytes": 107801,
+      "gzipBytes": 28656,
+      "brotliBytes": 24659,
       "assets": ["worker.js"]
     },
     {
       "entry": "minidraco/three main + worker graph",
       "file": "minidraco/three main + worker graph",
-      "rawBytes": 114169,
-      "gzipBytes": 31236,
-      "brotliBytes": 26979,
+      "rawBytes": 114163,
+      "gzipBytes": 31241,
+      "brotliBytes": 26933,
       "assets": ["three.js", "worker.js"]
     },
     {
       "entry": "minidraco/three sync fallback graph",
       "file": "minidraco/three sync fallback graph",
-      "rawBytes": 111393,
-      "gzipBytes": 29410,
-      "brotliBytes": 25318,
+      "rawBytes": 111387,
+      "gzipBytes": 29417,
+      "brotliBytes": 25338,
       "assets": ["index.js", "three.js"]
     }
   ]

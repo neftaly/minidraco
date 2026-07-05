@@ -10,85 +10,85 @@
       "file": "canine-bundle.glb",
       "mode": "decode",
       "primitives": 1,
-      "minMs": 0.865,
-      "medianMs": 1.347,
+      "minMs": 0.815,
+      "medianMs": 1.011,
       "heapGrowthBytes": 0,
       "retainedHeapBytes": 0,
       "arrayBufferGrowthBytes": 28292,
       "arrayBufferFloorBytes": 56568,
       "arrayBufferGapBytes": -28276,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 1.517
+      "gcMedianMs": 1.478
     },
     {
       "file": "canine-bundle.glb",
       "mode": "decode+extract",
       "primitives": 1,
-      "minMs": 0.747,
-      "medianMs": 0.858,
+      "minMs": 0.721,
+      "medianMs": 0.907,
       "heapGrowthBytes": 0,
       "retainedHeapBytes": 0,
       "arrayBufferGrowthBytes": 34788,
       "arrayBufferFloorBytes": 122536,
       "arrayBufferGapBytes": -87748,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 1.589
+      "gcMedianMs": 1.74
     },
     {
       "file": "player-bundle.glb",
       "mode": "decode",
       "primitives": 7,
-      "minMs": 2.023,
-      "medianMs": 2.442,
+      "minMs": 2.02,
+      "medianMs": 2.534,
       "heapGrowthBytes": 0,
       "retainedHeapBytes": 0,
       "arrayBufferGrowthBytes": 134712,
       "arrayBufferFloorBytes": 242300,
       "arrayBufferGapBytes": -107588,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 2.263
+      "gcMedianMs": 2.476
     },
     {
       "file": "player-bundle.glb",
       "mode": "decode+extract",
       "primitives": 7,
-      "minMs": 2.094,
-      "medianMs": 2.171,
+      "minMs": 2.067,
+      "medianMs": 2.177,
       "heapGrowthBytes": 0,
       "retainedHeapBytes": 0,
       "arrayBufferGrowthBytes": 166024,
       "arrayBufferFloorBytes": 515228,
       "arrayBufferGapBytes": -349204,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 1.92
+      "gcMedianMs": 1.813
     },
     {
       "file": "static-bundle.glb",
       "mode": "decode",
       "primitives": 488,
-      "minMs": 64.485,
-      "medianMs": 69.866,
-      "heapGrowthBytes": 12251,
-      "retainedHeapBytes": 12251,
+      "minMs": 64.184,
+      "medianMs": 67.867,
+      "heapGrowthBytes": 5500,
+      "retainedHeapBytes": 5500,
       "arrayBufferGrowthBytes": 6661880,
       "arrayBufferFloorBytes": 11560080,
       "arrayBufferGapBytes": -4898200,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 3.133
+      "gcMedianMs": 3.044
     },
     {
       "file": "static-bundle.glb",
       "mode": "decode+extract",
       "primitives": 488,
-      "minMs": 62.09,
-      "medianMs": 64.783,
+      "minMs": 62.424,
+      "medianMs": 64.258,
       "heapGrowthBytes": 0,
       "retainedHeapBytes": 0,
       "arrayBufferGrowthBytes": 9367084,
       "arrayBufferFloorBytes": 22702752,
       "arrayBufferGapBytes": -13335668,
       "retainedArrayBufferBytes": 0,
-      "gcMedianMs": 3.297
+      "gcMedianMs": 3.183
     }
   ]
 }
