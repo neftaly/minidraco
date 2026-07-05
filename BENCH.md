@@ -113,12 +113,12 @@ pause time. Median of 15 runs after 3 warmups on the production bundle GLBs.
 
 | file                | mode           | prims |   median |   heap+ | heap retained | arraybuf+ | arraybuf retained | gc median |
 | ------------------- | -------------- | ----: | -------: | ------: | ------------: | --------: | ----------------: | --------: |
-| `canine-bundle.glb` | decode         |     1 |  1.01 ms |     0 B |           0 B |  27.63 KB |               0 B |   1.48 ms |
-| `canine-bundle.glb` | decode+extract |     1 |  0.91 ms |     0 B |           0 B |  33.97 KB |               0 B |   1.74 ms |
-| `player-bundle.glb` | decode         |     7 |  2.53 ms |     0 B |           0 B | 131.55 KB |               0 B |   2.48 ms |
-| `player-bundle.glb` | decode+extract |     7 |  2.18 ms |     0 B |           0 B | 162.13 KB |               0 B |   1.81 ms |
-| `static-bundle.glb` | decode         |   488 | 67.87 ms | 5.37 KB |       5.37 KB |   6.35 MB |               0 B |   3.04 ms |
-| `static-bundle.glb` | decode+extract |   488 | 64.26 ms |     0 B |           0 B |   8.93 MB |               0 B |   3.18 ms |
+| `canine-bundle.glb` | decode         |     1 |  1.23 ms |     0 B |           0 B |  27.63 KB |             508 B |   1.54 ms |
+| `canine-bundle.glb` | decode+extract |     1 |  0.89 ms |     0 B |           0 B |  33.97 KB |               0 B |   1.77 ms |
+| `player-bundle.glb` | decode         |     7 |  2.55 ms |     0 B |           0 B | 131.55 KB |               0 B |   2.43 ms |
+| `player-bundle.glb` | decode+extract |     7 |  2.32 ms |     0 B |           0 B | 162.13 KB |               0 B |   2.21 ms |
+| `static-bundle.glb` | decode         |   488 | 71.18 ms | 6.20 KB |       6.20 KB |   6.35 MB |               0 B |   3.19 ms |
+| `static-bundle.glb` | decode+extract |   488 | 68.31 ms |     0 B |           0 B |   8.93 MB |               0 B |   3.51 ms |
 
 ## Deployed size
 
