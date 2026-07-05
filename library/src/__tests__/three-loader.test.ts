@@ -101,12 +101,40 @@ describe('MiniDRACOLoader index arrays', () => {
     const buffer = readArrayBuffer(`${import.meta.dir}/fixtures/cube.drc`)
 
     expect(loader.setDecoderPath('/draco/')).toBe(loader)
+    expect(loader.setDecoderPath({ wasm: '/draco/draco_decoder.wasm' })).toBe(loader)
     expect(loader.setDecoderConfig({ type: 'js' })).toBe(loader)
 
     const geometry = await loader.decodeDracoFile(buffer)
     if (!geometry) throw new Error('decodeDracoFile did not return geometry')
 
     expect(geometry.index?.array).toBeInstanceOf(Uint16Array)
+  })
+
+  test('constructor options configure the worker policy', async () => {
+    const syncLoader = new MiniDRACOLoader({ workers: false })
+    const tunedLoader = new MiniDRACOLoader({ workerLimit: 8, syncByteThreshold: 1234 })
+    const buffer = readArrayBuffer(`${import.meta.dir}/fixtures/cube.drc`)
+
+    expect(syncLoader.workerLimit).toBe(0)
+    expect(tunedLoader.workerLimit).toBe(8)
+    expect(tunedLoader.syncByteThreshold).toBe(1234)
+
+    syncLoader._decodeInWorker = async () => {
+      throw new Error('worker path should not run')
+    }
+    const geometry = await withWorkerAvailable(() => syncLoader.decodeDracoFile(buffer))
+    if (!geometry) throw new Error('decodeDracoFile did not return geometry')
+
+    expect(geometry.index?.array).toBeInstanceOf(Uint16Array)
+  })
+
+  test('setWorkers toggles the pool while remaining chainable', () => {
+    const loader = new MiniDRACOLoader({ workerLimit: 2 })
+
+    expect(loader.setWorkers(false)).toBe(loader)
+    expect(loader.workerLimit).toBe(0)
+    expect(loader.setWorkers(true)).toBe(loader)
+    expect(loader.workerLimit).toBe(4)
   })
 
   test('syncByteThreshold remains an opt-in main-thread decode path', async () => {

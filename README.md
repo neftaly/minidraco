@@ -21,10 +21,22 @@ gltfLoader.setDRACOLoader(new MiniDRACOLoader())
 gltfLoader.load('model.glb', gltf => scene.add(gltf.scene))
 ```
 
-`MiniDRACOLoader` is API-compatible with `THREE.DRACOLoader` (`setDecoderPath` and friends are
-no-ops). Decoding runs in a pool of module workers (default 4, `setWorkerLimit(n)` to change,
-`0` to force synchronous main-thread decoding). If workers can't be spawned (SSR, exotic
-bundlers), it falls back to synchronous decoding automatically.
+`MiniDRACOLoader` is a structural drop-in for `THREE.DRACOLoader`: it's assignable to it with no
+cast on any three version (`setDecoderPath` and friends are no-ops), so
+`gltfLoader.setDRACOLoader(new MiniDRACOLoader())` just type-checks.
+
+Decoding runs in a pool of module workers by default (parallel across primitives, main thread
+stays free). If workers can't be spawned (SSR, exotic bundlers), it falls back to synchronous
+decoding automatically. Configure it at construction or with fluent setters:
+
+```ts
+new MiniDRACOLoader({ workers: false }) // decode synchronously on the main thread
+new MiniDRACOLoader({ workerLimit: 8 }) // pool size (default 4)
+new MiniDRACOLoader(loadingManager) // a three.js LoadingManager, as usual
+
+const loader = new MiniDRACOLoader()
+loader.setWorkers(false) // ...or toggle later (same as setWorkerLimit(0))
+```
 
 **Serving JS from a CDN origin** (Next.js `assetPrefix`, etc.) works out of the box: browsers
 refuse to construct a Worker from a cross-origin script, so minidraco bootstraps the worker

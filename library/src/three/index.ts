@@ -3,7 +3,7 @@
 // without following the worker's own imports (notably Next/Turbopack).
 import { MiniDRACOLoaderBase } from './core'
 
-export type { AttributeIDs, AttributeTypes } from './core'
+export type { AttributeIDs, AttributeTypes, MiniDRACOLoaderOptions } from './core'
 
 class MiniDRACOLoader extends MiniDRACOLoaderBase {
   override _createWorker(): Worker | null {

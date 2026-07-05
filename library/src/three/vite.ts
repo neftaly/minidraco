@@ -4,7 +4,7 @@
 // self-contained worker out of Vite app bundles.
 import { MiniDRACOLoaderBase } from './core'
 
-export type { AttributeIDs, AttributeTypes } from './core'
+export type { AttributeIDs, AttributeTypes, MiniDRACOLoaderOptions } from './core'
 
 class MiniDRACOLoader extends MiniDRACOLoaderBase {
   override _createWorker(): Worker | null {
