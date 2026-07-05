@@ -5,6 +5,12 @@
   "cpu": "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
   "packageArtifacts": [
     {
+      "file": "chunk-PA2WQDT2.js",
+      "rawBytes": 12746,
+      "gzipBytes": 3859,
+      "brotliBytes": 3358
+    },
+    {
       "file": "index.d.ts",
       "rawBytes": 8398,
       "gzipBytes": 2029,
@@ -18,15 +24,33 @@
     },
     {
       "file": "three.d.ts",
-      "rawBytes": 7950,
-      "gzipBytes": 1958,
-      "brotliBytes": 1774
+      "rawBytes": 8155,
+      "gzipBytes": 1992,
+      "brotliBytes": 1807
     },
     {
       "file": "three.js",
-      "rawBytes": 12514,
-      "gzipBytes": 3810,
-      "brotliBytes": 3316
+      "rawBytes": 364,
+      "gzipBytes": 230,
+      "brotliBytes": 195
+    },
+    {
+      "file": "three/vite.d.ts",
+      "rawBytes": 8155,
+      "gzipBytes": 1992,
+      "brotliBytes": 1807
+    },
+    {
+      "file": "three/vite.js",
+      "rawBytes": 408,
+      "gzipBytes": 253,
+      "brotliBytes": 220
+    },
+    {
+      "file": "worker-vite.js",
+      "rawBytes": 4298,
+      "gzipBytes": 2292,
+      "brotliBytes": 2102
     },
     {
       "file": "worker.d.ts",
@@ -43,6 +67,13 @@
   ],
   "browserAssets": [
     {
+      "entry": "chunk-PA2WQDT2.js",
+      "file": "chunk-PA2WQDT2.min.js",
+      "rawBytes": 6530,
+      "gzipBytes": 2605,
+      "brotliBytes": 2294
+    },
+    {
       "entry": "index.js",
       "file": "index.min.js",
       "rawBytes": 105025,
@@ -52,9 +83,23 @@
     {
       "entry": "three.js",
       "file": "three.min.js",
-      "rawBytes": 6362,
-      "gzipBytes": 2585,
-      "brotliBytes": 2274
+      "rawBytes": 243,
+      "gzipBytes": 194,
+      "brotliBytes": 159
+    },
+    {
+      "entry": "three/vite.js",
+      "file": "three/vite.min.js",
+      "rawBytes": 302,
+      "gzipBytes": 222,
+      "brotliBytes": 212
+    },
+    {
+      "entry": "worker-vite.js",
+      "file": "worker-vite.min.js",
+      "rawBytes": 2974,
+      "gzipBytes": 1989,
+      "brotliBytes": 1862
     },
     {
       "entry": "worker.js",
@@ -76,10 +121,10 @@
     {
       "entry": "minidraco/three main",
       "file": "minidraco/three main graph.min.js",
-      "rawBytes": 6362,
-      "gzipBytes": 2585,
-      "brotliBytes": 2274,
-      "assets": ["three.js"]
+      "rawBytes": 6773,
+      "gzipBytes": 2799,
+      "brotliBytes": 2453,
+      "assets": ["chunk-PA2WQDT2.js", "three.js"]
     },
     {
       "entry": "minidraco worker graph",
@@ -92,18 +137,50 @@
     {
       "entry": "minidraco/three main + worker graph",
       "file": "minidraco/three main + worker graph",
-      "rawBytes": 114163,
-      "gzipBytes": 31241,
-      "brotliBytes": 26933,
-      "assets": ["three.js", "worker.js"]
+      "rawBytes": 114574,
+      "gzipBytes": 31455,
+      "brotliBytes": 27112,
+      "assets": ["chunk-PA2WQDT2.js", "three.js", "worker.js"]
+    },
+    {
+      "entry": "minidraco/three/vite main",
+      "file": "minidraco/three/vite main graph.min.js",
+      "rawBytes": 6832,
+      "gzipBytes": 2827,
+      "brotliBytes": 2506,
+      "assets": ["chunk-PA2WQDT2.js", "three/vite.js"]
+    },
+    {
+      "entry": "minidraco/three/vite worker graph",
+      "file": "minidraco/three/vite worker graph.min.js",
+      "rawBytes": 107999,
+      "gzipBytes": 28821,
+      "brotliBytes": 24926,
+      "assets": ["index.js", "worker-vite.js"]
+    },
+    {
+      "entry": "minidraco/three/vite main + worker graph",
+      "file": "minidraco/three/vite main + worker graph",
+      "rawBytes": 114831,
+      "gzipBytes": 31648,
+      "brotliBytes": 27432,
+      "assets": ["chunk-PA2WQDT2.js", "index.js", "three/vite.js", "worker-vite.js"]
+    },
+    {
+      "entry": "minidraco + three/vite main + worker graph",
+      "file": "minidraco + three/vite main + worker graph",
+      "rawBytes": 219856,
+      "gzipBytes": 58480,
+      "brotliBytes": 50496,
+      "assets": ["index.js", "chunk-PA2WQDT2.js", "index.js", "three/vite.js", "worker-vite.js"]
     },
     {
       "entry": "minidraco/three sync fallback graph",
       "file": "minidraco/three sync fallback graph",
-      "rawBytes": 111387,
-      "gzipBytes": 29417,
-      "brotliBytes": 25338,
-      "assets": ["index.js", "three.js"]
+      "rawBytes": 111798,
+      "gzipBytes": 29631,
+      "brotliBytes": 25517,
+      "assets": ["chunk-PA2WQDT2.js", "index.js", "three.js"]
     }
   ]
 }

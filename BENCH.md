@@ -124,31 +124,41 @@ pause time. Median of 15 runs after 3 warmups on the production bundle GLBs.
 
 Minified browser bundles are built from `library/dist` with `three` externalized for
 `minidraco/three`. The worker is a separate module-worker asset referenced by
-`new URL("./worker.js", import.meta.url)`.
+`new URL("./worker.js", import.meta.url)`. Vite worker rows count the worker
+payload separately because Vite does not share chunks across the main and worker
+graphs by default.
 
 - Date: 2026-07-05
 - Runtime: bun 1.3.14
 
 Package artifacts:
 
-| file          |       raw |     gzip |   brotli |
-| ------------- | --------: | -------: | -------: |
-| `index.d.ts`  |   8.20 KB |  1.98 KB |  1.77 KB |
-| `index.js`    | 228.28 KB | 39.98 KB | 33.30 KB |
-| `three.d.ts`  |   7.76 KB |  1.91 KB |  1.73 KB |
-| `three.js`    |  12.22 KB |  3.72 KB |  3.24 KB |
-| `worker.d.ts` |      13 B |     33 B |     17 B |
-| `worker.js`   | 232.28 KB | 42.19 KB | 35.06 KB |
+| file                |       raw |     gzip |   brotli |
+| ------------------- | --------: | -------: | -------: |
+| `chunk-PA2WQDT2.js` |  12.45 KB |  3.77 KB |  3.28 KB |
+| `index.d.ts`        |   8.20 KB |  1.98 KB |  1.77 KB |
+| `index.js`          | 228.28 KB | 39.98 KB | 33.30 KB |
+| `three.d.ts`        |   7.96 KB |  1.95 KB |  1.76 KB |
+| `three.js`          |     364 B |    230 B |    195 B |
+| `three/vite.d.ts`   |   7.96 KB |  1.95 KB |  1.76 KB |
+| `three/vite.js`     |     408 B |    253 B |    220 B |
+| `worker-vite.js`    |   4.20 KB |  2.24 KB |  2.05 KB |
+| `worker.d.ts`       |      13 B |     33 B |     17 B |
+| `worker.js`         | 232.28 KB | 42.19 KB | 35.06 KB |
 
 Browser-deployed bundles:
 
-| file                                  |       raw |     gzip |   brotli |
-| ------------------------------------- | --------: | -------: | -------: |
-| `minidraco graph.min.js`              | 102.56 KB | 26.20 KB | 22.52 KB |
-| `minidraco/three main graph.min.js`   |   6.21 KB |  2.52 KB |  2.22 KB |
-| `minidraco worker graph.min.js`       | 105.27 KB | 27.98 KB | 24.08 KB |
-| `minidraco/three main + worker graph` | 111.49 KB | 30.51 KB | 26.30 KB |
-| `minidraco/three sync fallback graph` | 108.78 KB | 28.73 KB | 24.74 KB |
+| file                                         |       raw |     gzip |   brotli |
+| -------------------------------------------- | --------: | -------: | -------: |
+| `minidraco graph.min.js`                     | 102.56 KB | 26.20 KB | 22.52 KB |
+| `minidraco/three main graph.min.js`          |   6.61 KB |  2.73 KB |  2.40 KB |
+| `minidraco worker graph.min.js`              | 105.27 KB | 27.98 KB | 24.08 KB |
+| `minidraco/three main + worker graph`        | 111.89 KB | 30.72 KB | 26.48 KB |
+| `minidraco/three/vite main graph.min.js`     |   6.67 KB |  2.76 KB |  2.45 KB |
+| `minidraco/three/vite worker graph.min.js`   | 105.47 KB | 28.15 KB | 24.34 KB |
+| `minidraco/three/vite main + worker graph`   | 112.14 KB | 30.91 KB | 26.79 KB |
+| `minidraco + three/vite main + worker graph` | 214.70 KB | 57.11 KB | 49.31 KB |
+| `minidraco/three sync fallback graph`        | 109.18 KB | 28.94 KB | 24.92 KB |
 
 Medians of independent runs carry roughly ±10% JIT/thermal noise (more for the loader wall
 clock) — treat this as the cross-decoder picture, not a micro-optimization ranking.

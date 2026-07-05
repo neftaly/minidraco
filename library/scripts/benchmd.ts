@@ -287,7 +287,9 @@ export const renderBenchMd = (
     lines.push(
       'Minified browser bundles are built from `library/dist` with `three` externalized for',
       '`minidraco/three`. The worker is a separate module-worker asset referenced by',
-      '`new URL("./worker.js", import.meta.url)`.',
+      '`new URL("./worker.js", import.meta.url)`. Vite worker rows count the worker',
+      'payload separately because Vite does not share chunks across the main and worker',
+      'graphs by default.',
       '',
       `- Date: ${size.date}`,
       `- Runtime: ${size.runtime}`,

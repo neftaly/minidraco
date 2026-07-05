@@ -10,7 +10,7 @@ import { defineConfig } from 'tsup'
 // a content-hashed `Mesh-<hash>.d.ts` file.
 export default defineConfig([
   {
-    entry: { index: 'src/index.ts', three: 'src/three/index.ts' },
+    entry: { index: 'src/index.ts', three: 'src/three/index.ts', 'three/vite': 'src/three/vite.ts' },
     clean: true,
     format: ['esm'],
     dts: false,
@@ -24,6 +24,13 @@ export default defineConfig([
     splitting: false,
   },
   {
+    entry: { 'worker-vite': 'src/worker.ts' },
+    format: ['esm'],
+    dts: false,
+    splitting: false,
+    external: ['./index.js'],
+  },
+  {
     entry: { index: 'src/index.ts', worker: 'src/worker.ts' },
     format: ['esm'],
     dts: { only: true },
@@ -31,6 +38,13 @@ export default defineConfig([
   },
   {
     entry: { three: 'src/three/index.ts' },
+    format: ['esm'],
+    dts: { only: true },
+    splitting: false,
+    external: ['three'],
+  },
+  {
+    entry: { 'three/vite': 'src/three/vite.ts' },
     format: ['esm'],
     dts: { only: true },
     splitting: false,

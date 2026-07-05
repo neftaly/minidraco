@@ -6,9 +6,9 @@
 //   bun library/scripts/sizebench.ts          # writes BENCH.size.json
 //   bun library/scripts/sizebench.ts --quick  # print only
 
-import { existsSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { cpus } from 'node:os'
-import { resolve } from 'node:path'
+import { relative, resolve } from 'node:path'
 import { brotliCompressSync, gzipSync } from 'node:zlib'
 
 import { formatBytes, table } from './bench-core'
@@ -41,14 +41,21 @@ const sizeRow = (file: string, bytes: Uint8Array): SizeRow => ({
   brotliBytes: brotliCompressSync(bytes).byteLength,
 })
 
+const distFiles = (dir = distDir): string[] =>
+  readdirSync(dir).flatMap(name => {
+    const path = resolve(dir, name)
+    if (statSync(path).isDirectory()) return distFiles(path)
+    return [relative(distDir, path).replaceAll('\\', '/')]
+  })
+
 const packageArtifacts = (): SizeRow[] =>
-  readdirSync(distDir)
+  distFiles()
     .filter(name => name.endsWith('.js') || name.endsWith('.d.ts'))
     .toSorted()
     .map(file => sizeRow(file, readFileSync(resolve(distDir, file))))
 
 const jsArtifacts = (): string[] =>
-  readdirSync(distDir)
+  distFiles()
     .filter(name => name.endsWith('.js'))
     .toSorted()
 
@@ -76,18 +83,23 @@ const localImportFiles = (file: string, allJs: string[], includeDynamic: boolean
   const jsSet = new Set(allJs)
   const imports = new Set<string>()
   const code = readFileSync(resolve(distDir, file), 'utf8')
+  const resolveSpecifier = (specifier: string): string | null => {
+    if (!specifier.startsWith('./') && !specifier.startsWith('../')) return null
+    const imported = relative(distDir, resolve(distDir, file, '..', specifier)).replaceAll('\\', '/')
+    return jsSet.has(imported) ? imported : null
+  }
   const collect = (pattern: RegExp) => {
     let match: RegExpExecArray | null
     while ((match = pattern.exec(code)) !== null) {
       const specifier = match[1]
-      if (!specifier?.startsWith('./')) continue
-      const imported = specifier.slice(2)
-      if (jsSet.has(imported)) imports.add(imported)
+      if (!specifier) continue
+      const imported = resolveSpecifier(specifier)
+      if (imported !== null) imports.add(imported)
     }
   }
 
-  collect(/\b(?:import|export)\s*(?:[^"'()]*?\s*from\s*)?["'](\.\/[^"']+\.js)["']/g)
-  if (includeDynamic) collect(/\bimport\s*\(\s*["'](\.\/[^"']+\.js)["']\s*\)/g)
+  collect(/\b(?:import|export)\s*(?:[^"'()]*?\s*from\s*)?["']((?:\.\/|\.\.\/)[^"']+\.js)["']/g)
+  if (includeDynamic) collect(/\bimport\s*\(\s*["']((?:\.\/|\.\.\/)[^"']+\.js)["']\s*\)/g)
 
   return allJs.filter(imported => imports.has(imported))
 }
@@ -139,7 +151,10 @@ const deployedBundles = (assets: BrowserBundleRow[]): BrowserBundleRow[] => {
   const root = assetGraph(['index.js'], allJs)
   const threeMain = assetGraph(['three.js'], allJs)
   const worker = assetGraph(['worker.js'], allJs)
+  const threeViteMain = assetGraph(['three/vite.js'], allJs)
+  const workerVite = assetGraph(['worker-vite.js'], allJs)
   const threeWorker = unionGraph([threeMain, worker], allJs)
+  const threeViteWorker = unionGraph([threeViteMain, workerVite], allJs)
   const threeSyncFallback = assetGraph(['three.js'], allJs, true)
 
   const rows = [
@@ -147,6 +162,20 @@ const deployedBundles = (assets: BrowserBundleRow[]): BrowserBundleRow[] => {
     graphRow('minidraco/three main', 'minidraco/three main graph.min.js', threeMain, assetRows),
     graphRow('minidraco worker graph', 'minidraco worker graph.min.js', worker, assetRows),
     graphRow('minidraco/three main + worker graph', 'minidraco/three main + worker graph', threeWorker, assetRows),
+    graphRow('minidraco/three/vite main', 'minidraco/three/vite main graph.min.js', threeViteMain, assetRows),
+    graphRow('minidraco/three/vite worker graph', 'minidraco/three/vite worker graph.min.js', workerVite, assetRows),
+    graphRow(
+      'minidraco/three/vite main + worker graph',
+      'minidraco/three/vite main + worker graph',
+      threeViteWorker,
+      assetRows,
+    ),
+    graphRow(
+      'minidraco + three/vite main + worker graph',
+      'minidraco + three/vite main + worker graph',
+      [...root, ...threeViteWorker],
+      assetRows,
+    ),
   ]
 
   if (!sameGraph(threeSyncFallback, threeMain)) {

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 
 import { MiniDRACOLoader } from '../three'
+import { MiniDRACOLoader as MiniDRACOLoaderVite } from '../three/vite'
 
 const taskConfig = {
   attributeIDs: {},
@@ -39,6 +40,35 @@ const withWorkerAvailable = async <T>(fn: () => Promise<T>): Promise<T> => {
 
   try {
     return await fn()
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, 'Worker', descriptor)
+    else Reflect.deleteProperty(globalThis, 'Worker')
+  }
+}
+
+const withCapturedWorkers = async <T>(
+  fn: (created: { url: string | URL; options?: WorkerOptions }[]) => T | Promise<T>,
+): Promise<T> => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'Worker')
+  const created: { url: string | URL; options?: WorkerOptions }[] = []
+
+  class FakeWorker {
+    onmessage: ((event: MessageEvent) => void) | null = null
+    onerror: ((event: ErrorEvent) => void) | null = null
+
+    constructor(url: string | URL, options?: WorkerOptions) {
+      created.push({ url, options })
+    }
+
+    postMessage() {}
+
+    terminate() {}
+  }
+
+  Object.defineProperty(globalThis, 'Worker', { configurable: true, value: FakeWorker })
+
+  try {
+    return await fn(created)
   } finally {
     if (descriptor) Object.defineProperty(globalThis, 'Worker', descriptor)
     else Reflect.deleteProperty(globalThis, 'Worker')
@@ -100,5 +130,30 @@ describe('MiniDRACOLoader index arrays', () => {
     const geometry = loader._buildGeometry(mesh as never, taskConfig)
 
     expect(geometry.index?.array).toBeInstanceOf(Uint32Array)
+  })
+
+  test('default loader keeps the self-contained worker URL', async () => {
+    const loader = new MiniDRACOLoader()
+
+    await withCapturedWorkers(created => {
+      expect(loader._getWorker()).not.toBeNull()
+      expect(String(created[0]?.url).endsWith('/worker.js')).toBe(true)
+      expect(String(created[0]?.url).includes('worker-vite')).toBe(false)
+      expect(created[0]?.options).toEqual({ type: 'module' })
+    })
+
+    loader.dispose()
+  })
+
+  test('vite loader creates the Vite-owned module worker URL', async () => {
+    const loader = new MiniDRACOLoaderVite()
+
+    await withCapturedWorkers(created => {
+      expect(loader._getWorker()).not.toBeNull()
+      expect(String(created[0]?.url).endsWith('/worker-vite.js')).toBe(true)
+      expect(created[0]?.options).toEqual({ type: 'module' })
+    })
+
+    loader.dispose()
   })
 })

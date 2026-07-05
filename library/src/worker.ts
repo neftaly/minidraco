@@ -2,7 +2,7 @@
 // (no emitted sibling chunk imports) so frameworks that deploy worker URLs as
 // static/media assets, including Next/Turbopack, do not strand the decoder
 // chunk and force MiniDRACOLoader onto its synchronous fallback path.
-import { decodeDracoMesh } from './index'
+import { decodeDracoMesh } from './index.js'
 
 interface DecodeTask {
   id: number

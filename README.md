@@ -33,6 +33,12 @@ must send `Access-Control-Allow-Origin`, which it already does if you load model
 it). If even that fails, decoding falls back to the main thread rather than erroring.
 `setWorkerUrl(url)` exists as a manual override for exotic setups.
 
+Vite apps can import `MiniDRACOLoader` from `minidraco/three/vite` to let Vite own the worker
+build via a direct `new Worker(new URL(...), { type: 'module' })` entry. The default
+`minidraco/three` export stays self-contained for Next/Turbopack-style worker asset deployment.
+Vite still builds the worker as a separate graph, so importing `minidraco` on the main thread as
+well does not dedupe the decoder across main and worker chunks.
+
 Or decode a raw Draco bitstream without Three.js:
 
 ```ts
