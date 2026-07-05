@@ -233,8 +233,8 @@ class MeshPredictionSchemeTexCoordsPortablePredictor {
         const xUV0 = nUV0 * pnNorm2Squared + cnDotPn * pnUV0
         const xUV1 = nUV1 * pnNorm2Squared + cnDotPn * pnUV1
 
-        const pnAbsMax = Math.max(Math.abs(pn0), Math.abs(pn1), Math.abs(pn2))
-        if (pnAbsMax > 0 && Math.abs(cnDotPn) > INT64_MAX / pnAbsMax) {
+        // pnAbsMaxG and cnDotPnAbs were computed above and are unchanged here.
+        if (pnAbsMaxG > 0 && cnDotPnAbs > INT64_MAX / pnAbsMaxG) {
           return false
         }
 
