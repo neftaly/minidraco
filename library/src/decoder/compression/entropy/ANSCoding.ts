@@ -153,6 +153,9 @@ export class RAnsDecoder {
       this.bufOffset = offset - 3
       this.state = memGetLe24(buf, offset - 3) & 0x3fffff
     } else if (x === 3) {
+      if (offset - base < 4) {
+        return 1
+      }
       this.bufOffset = offset - 4
       this.state = memGetLe32(buf, offset - 4) & 0x3fffffff
     } else {
