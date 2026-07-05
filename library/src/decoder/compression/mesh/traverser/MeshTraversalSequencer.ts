@@ -46,7 +46,7 @@ class MeshTraversalSequencer {
     this._traverser = traverser
   }
 
-  generateSequence(_outPointIds?: unknown): boolean {
+  generateSequence(): boolean {
     // A traversal's output (point order + encoding maps) depends only on the
     // corner table's connectivity AND the traversal method, not on the
     // attribute being decoded. Meshes with several vertex-mapped attributes

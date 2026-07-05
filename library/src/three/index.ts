@@ -296,14 +296,11 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
 
     if (_taskCache.has(buffer)) {
       const cachedTask = _taskCache.get(buffer)!
-
       if (cachedTask.key === taskKey) {
         return cachedTask.promise
-      } else if (buffer.byteLength === 0) {
-        throw new Error(
-          'MiniDRACOLoader: Unable to re-decode a buffer with different settings. Buffer has already been transferred.',
-        )
       }
+      // Same buffer, different settings: fall through and re-decode. (The input
+      // is copied to the worker, never transferred, so it's still intact.)
     }
 
     const geometryPending = this._runTask(buffer, taskConfig)

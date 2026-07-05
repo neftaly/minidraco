@@ -14,7 +14,7 @@ class LinearSequencer {
     this._outPointIds = new Int32Array(0)
   }
 
-  generateSequence(/* outPointIds */): boolean {
+  generateSequence(): boolean {
     if (this._numPoints < 0) {
       return false
     }

@@ -14,17 +14,13 @@ function computeRAnsPrecisionFromUniqueSymbolsBitLength(symbolsBitLength: number
 
 // Decodes symbols using rANS. uniqueSymbolsBitLength must match the encoder's.
 export class RAnsSymbolDecoder {
-  uniqueSymbolsBitLength_: number
   ransPrecisionBits_: number
-  ransPrecision_: number
   probabilityTable_: Uint32Array | null
   numSymbols_: number
   ans_: RAnsDecoder
 
   constructor(uniqueSymbolsBitLength: number) {
-    this.uniqueSymbolsBitLength_ = uniqueSymbolsBitLength
     this.ransPrecisionBits_ = computeRAnsPrecisionFromUniqueSymbolsBitLength(uniqueSymbolsBitLength)
-    this.ransPrecision_ = 1 << this.ransPrecisionBits_
     this.probabilityTable_ = null
     this.numSymbols_ = 0
     this.ans_ = new RAnsDecoder(this.ransPrecisionBits_)

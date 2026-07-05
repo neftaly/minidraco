@@ -111,7 +111,7 @@ const decodeTask = (task: DecodeTask, transfer: ArrayBuffer[]) => {
     transfer.push(array.buffer as ArrayBuffer)
   }
 
-  return { id, ok: true, numPoints, indices, attributes }
+  return { id, ok: true, indices, attributes }
 }
 
 self.onmessage = (event: MessageEvent<DecodeRequest>) => {

@@ -12,7 +12,7 @@ import type { DecoderBuffer } from '../../core/DecoderBuffer'
 
 // Structural interface satisfied by LinearSequencer and MeshTraversalSequencer.
 export interface PointsSequencer {
-  generateSequence(outPointIds: Int32Array): boolean
+  generateSequence(): boolean
   getOutputPointIds(): Int32Array
   updatePointToAttributeIndexMapping(attribute: PointAttribute): boolean
 }
@@ -58,7 +58,7 @@ class SequentialAttributeDecodersController extends AttributesDecoder {
     if (!this._sequencer) {
       return false
     }
-    if (!this._sequencer.generateSequence(this._pointIds)) {
+    if (!this._sequencer.generateSequence()) {
       return false
     }
     this._pointIds = this._sequencer.getOutputPointIds()

@@ -216,20 +216,6 @@ class MeshAttributeCornerTable {
     return this.vertex_to_left_most_corner_map_[v]
   }
 
-  face(corner: number): number {
-    // The minimal decoder CornerTable does not implement face(); this delegating
-    // method is kept (unused by the decoder) exactly like the source.
-    return (this.corner_table_ as unknown as { face(corner: number): number }).face(corner)
-  }
-
-  firstCorner(faceIndex: number): number {
-    return (this.corner_table_ as unknown as { firstCorner(faceIndex: number): number }).firstCorner(faceIndex)
-  }
-
-  allCorners(faceIndex: number): number[] {
-    return (this.corner_table_ as unknown as { allCorners(faceIndex: number): number[] }).allCorners(faceIndex)
-  }
-
   // --- Flat-array accessors: let DepthFirstTraverser avoid per-corner dispatch. ---
 
   cornerToVertexArray(): Int32Array | number[] {
@@ -291,10 +277,6 @@ class MeshAttributeCornerTable {
     this.no_interior_seams_ = other.no_interior_seams_
     this._effectiveOpposite = other._effectiveOpposite
     this._seamCorners = other._seamCorners
-  }
-
-  isDegenerated(faceIndex: number): boolean {
-    return (this.corner_table_ as unknown as { isDegenerated(faceIndex: number): boolean }).isDegenerated(faceIndex)
   }
 }
 
