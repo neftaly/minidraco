@@ -40,7 +40,7 @@ class MeshSequentialDecoder extends MeshDecoder {
     } else {
       // numFaces is known up front (and bounded by the buffer size checks
       // above), so size the face buffer once and write indices straight into
-      // it instead of a per-face array allocation + addFace call.
+      // it instead of a per-face temporary array.
       const mesh = this.mesh()!
       mesh.setNumFaces(numFaces)
       const faces = mesh.faces_
@@ -90,7 +90,7 @@ class MeshSequentialDecoder extends MeshDecoder {
       return false
     }
     // Reconstruct the indices from the differences, writing straight into the
-    // preallocated face buffer (no per-face array + addFace).
+    // preallocated face buffer (no per-face temporary array).
     // See MeshSequentialEncoder::CompressAndEncodeIndices() for more details.
     const mesh = this.mesh()!
     mesh.setNumFaces(numFaces)

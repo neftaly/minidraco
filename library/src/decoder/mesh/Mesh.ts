@@ -27,29 +27,17 @@ class Mesh extends PointCloud {
     this.attribute_data_ = []
   }
 
-  _ensureFaceCapacity(numFaces: number): void {
-    if (this.faces_.length >= numFaces * 3) {
-      return
-    }
-    // Grow geometrically so incremental addFace stays amortized O(1) instead
-    // of reallocating + copying the whole buffer per face
-    const grown = new Int32Array(Math.max(numFaces * 3, this.faces_.length * 2))
-    grown.set(this.faces_)
-    this.faces_ = grown
-  }
-
-  addFace(face: ArrayLike<number>): void {
-    const f = this.numFaces_
-    this._ensureFaceCapacity(f + 1)
-    const o = f * 3
-    this.faces_[o] = face[0]
-    this.faces_[o + 1] = face[1]
-    this.faces_[o + 2] = face[2]
-    this.numFaces_ = f + 1
-  }
-
+  // Sizes faces_ to hold numFaces faces. Called once per decode, before any
+  // face index is written (edgebreaker: _assignPointsToCorners; sequential:
+  // decodeConnectivity), so the buffer is allocated exactly here — the
+  // decoders fill faces_ directly rather than appending face-by-face.
   setNumFaces(numFaces: number): void {
-    this._ensureFaceCapacity(numFaces)
+    const needed = numFaces * 3
+    if (this.faces_.length < needed) {
+      const grown = new Int32Array(needed)
+      grown.set(this.faces_)
+      this.faces_ = grown
+    }
     this.numFaces_ = numFaces
   }
 

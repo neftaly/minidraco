@@ -61,14 +61,15 @@ class DepthFirstTraverser {
     return this._cornerTable
   }
 
-  // The per-corner scratch buffers are allocated here rather than in init():
-  // when the shared traversal cache hits, generateSequence returns before
-  // any traversal and the buffers would be allocated for nothing.
-  // Uint8Array (0/1) instead of Array(bool): these flags are read and written
-  // on every corner of the hottest decode loop (traverseFromCorner).
+  // Scratch buffers are set up here rather than in init() so a shared-traversal
+  // -cache hit — where generateSequence returns before any traversal — skips
+  // this entirely, including the visited-flag zero-fill (worth ~0.5% on the
+  // 488-primitive static bundle, which shares attribute corner tables across
+  // primitives). Uint8Array (0/1) instead of Array(bool): these flags are read
+  // and written on every corner of the hottest decode loop (traverseFromCorner).
+  // Decode-scoped scratch: released in bulk at the end of the decode.
   onTraversalStart(): void {
     const cornerTable = this._cornerTable!
-    // Decode-scoped scratch: released in bulk at the end of the decode.
     this._isFaceVisited = scratchUint8Zeroed(cornerTable.numFaces())
     this._isVertexVisited = scratchUint8Zeroed(cornerTable.numVertices())
     this._cornerTraversalStack = scratchInt32(this._numCorners)
