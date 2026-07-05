@@ -1,11 +1,13 @@
 // A drop-in replacement for three.js's DRACOLoader backed by the minidraco
 // pure-TypeScript decoder — no wasm files to host, no async decoder bootstrap.
-// API-compatible with THREE.DRACOLoader so it can be passed straight to
-// GLTFLoader.setDRACOLoader().
+// Structurally compatible with THREE.DRACOLoader so it can be passed straight
+// to GLTFLoader.setDRACOLoader() with no cast, on any three version.
 //
-// Decoding runs in a pool of module workers (parallel across primitives, main
-// thread stays free) with a transparent synchronous fallback when workers are
-// unavailable (SSR, worker bundling unsupported, or setWorkerLimit(0)).
+// By default decoding runs in a pool of module workers (parallel across
+// primitives, main thread stays free), with a transparent synchronous fallback
+// when workers are unavailable (SSR, worker bundling unsupported). Pass
+// `{ workers: false }` (or setWorkers(false) / setWorkerLimit(0)) to decode
+// synchronously on the main thread instead.
 import {
   BufferAttribute,
   BufferGeometry,
@@ -28,6 +30,24 @@ import type { Mesh, PointAttribute } from '../index'
 
 export type AttributeIDs = Record<string, number | string>
 export type AttributeTypes = Record<string, string>
+
+export interface MiniDRACOLoaderOptions {
+  // three.js LoadingManager, as with any loader.
+  manager?: LoadingManager
+  // false → decode synchronously on the main thread (no worker pool).
+  // Default true. Equivalent to workerLimit: 0 / setWorkers(false).
+  workers?: boolean
+  // Worker pool size when workers are enabled (default 4).
+  workerLimit?: number
+  // See the syncByteThreshold field (default 0 = always use the pool).
+  syncByteThreshold?: number
+}
+
+// LoadingManager instances expose itemStart(); an options bag does not. Lets
+// the constructor keep the three-compatible `new Loader(manager)` form while
+// also accepting `new MiniDRACOLoader({ workers: false })`.
+const isLoadingManager = (value: unknown): value is LoadingManager =>
+  typeof (value as { itemStart?: unknown } | null | undefined)?.itemStart === 'function'
 
 interface TaskConfig {
   attributeIDs: AttributeIDs
@@ -116,8 +136,12 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
   // origin (created lazily, revoked on dispose).
   _workerBlobUrl: string | null
 
-  constructor(manager?: LoadingManager) {
-    super(manager)
+  // Accepts either a LoadingManager (three-compatible form) or an options bag.
+  constructor(managerOrOptions?: LoadingManager | MiniDRACOLoaderOptions) {
+    const options: MiniDRACOLoaderOptions = isLoadingManager(managerOrOptions)
+      ? { manager: managerOrOptions }
+      : (managerOrOptions ?? {})
+    super(options.manager)
 
     this.defaultAttributeIDs = {
       position: 'POSITION',
@@ -133,8 +157,8 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
       uv: 'Float32Array',
     }
 
-    this.workerLimit = 4
-    this.syncByteThreshold = 0
+    this.workerLimit = options.workers === false ? 0 : (options.workerLimit ?? 4)
+    this.syncByteThreshold = options.syncByteThreshold ?? 0
     this._workers = []
     this._taskId = 0
     this._tasks = new Map()
@@ -154,18 +178,31 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
     return this
   }
 
-  // Kept for API compatibility with THREE.DRACOLoader — minidraco has no
-  // external decoder files to configure.
-  setDecoderPath(_path?: string): this {
+  // No-ops kept for API compatibility with THREE.DRACOLoader — minidraco has
+  // no external decoder files to configure. The params are `unknown` (not
+  // `string`/`object`) so the signatures stay assignable to THREE.DRACOLoader
+  // across three versions, whose setDecoderPath has grown to accept a
+  // `string | DecoderPaths` — letting `new MiniDRACOLoader()` be passed to
+  // GLTFLoader.setDRACOLoader() with no cast.
+  setDecoderPath(_path?: unknown): this {
     return this
   }
 
-  setDecoderConfig(_config?: object): this {
+  setDecoderConfig(_config?: unknown): this {
     return this
   }
 
   setWorkerLimit(limit: number): this {
     this.workerLimit = limit
+    return this
+  }
+
+  // Toggle the worker pool on/off. false decodes synchronously on the main
+  // thread; true enables the pool, keeping the current size or falling back to
+  // the default 4 if it was disabled. For a specific pool size use
+  // setWorkerLimit(n).
+  setWorkers(enabled: boolean): this {
+    this.workerLimit = enabled ? this.workerLimit || 4 : 0
     return this
   }
 
@@ -513,3 +550,20 @@ class MiniDRACOLoader extends Loader<BufferGeometry> {
 }
 
 export { MiniDRACOLoader, MiniDRACOLoader as DRACOLoader }
+
+// --- Compile-time guard: MiniDRACOLoader must stay assignable to a
+// THREE.DRACOLoader-shaped type so it can be passed to
+// GLTFLoader.setDRACOLoader() with no cast on any three version. Newer three
+// types setDecoderPath as `string | DecoderPaths`, so the no-op setters must
+// accept a widened param (see setDecoderPath/setDecoderConfig above). This is
+// purely type-level — it emits no runtime code. If the surface regresses,
+// `_LoaderAssignabilityGuard` resolves to a non-`true` type and errors here.
+type _DracoLoaderShape = {
+  setDecoderPath(path: string | Record<string, string>): unknown
+  setDecoderConfig(config: object): unknown
+  setWorkerLimit(limit: number): unknown
+  preload(): unknown
+  dispose(): unknown
+}
+type _Expect<T extends true> = T
+type _LoaderAssignabilityGuard = _Expect<MiniDRACOLoader extends _DracoLoaderShape ? true : false>
